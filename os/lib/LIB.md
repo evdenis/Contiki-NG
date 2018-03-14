@@ -8,7 +8,7 @@
 
 ### Verification status:
 
-- minimal-contracts for RTEs by Alexandre Peyrard
+- minimal-contracts for RTEs
 - finished ?
 - functional correctness probably hard (would also require RPP)
 
@@ -115,7 +115,7 @@
 
 ### Verification status:
 
-- functional verification performed by Allan Blanchard
+- functional verification performed
 
 ## MEMB:
 
@@ -125,7 +125,7 @@
 
 ### Verification status:
 
-- functional verification partially performed by Frédéric Mangano
+- functional verification partially performed
 - for FULL functional correctness
     - handling of allocated/freed/dangling/... required
 
