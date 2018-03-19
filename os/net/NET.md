@@ -2,25 +2,44 @@
 
 ## LINKADDR
 
+### Dependencies:
+
+- None
+
+### Verification status:
+
 - no verification attempted
 - Absence of RTE should be trivial
 
 ## LINK-STATS
 
+### Dependencies:
+
+- SYS/CLOCK
+- NET/PACKETBUF
+- NET/NBR-TABLE
+
+### Verification status:
+
 - no verification attempted
-- requires NBR-TABLE and PACKETBUF
-    - requires to have good specifications for them
+- requires to have good specifications for NBR-TABLE and PACKETBUF
 - many defines
-- except for parts that communicate with NBR-TABLE and PACKETBUF
-  it would not be too hard
 
 ## NBR-TABLE
 
+### Dependencies:
+
+- LIB/MEMB
+- LIB/LIST
+- NET/NBR-TABLE
+
+### Verification status:
+
 - no verification attempted
-- relies on MEMB and LIST modules
 - global variables
 - some pointer manipulation with casts
 - a few functions are quite complex
+- requires \valid_function
 
 ## NET-DEBUG
 
@@ -29,21 +48,39 @@
 
 ## NETSTACK
 
+### Dependencies:
+
+- LIB/LIST
+
+### Verification status:
+
 - no verification attempted
-- relies on LIST module
-- except this, it would not be too hard
+- requires \valid_function
 
 ## PACKETBUF
 
+### Dependencies:
+
+- SYS/CC 
+
+### Verification status:
+
 - no verification attempted
 - some global variables
+- some cast and pointer manipulation
 - verification of absence of RTE would not be too hard
 
 ## QUEUEBUF
 
+### Dependencies:
+
+- (for DEBUG) LIB/LIST
+- LIB/MEMB
+- (Optionnaly) CFS
+
+### Verification status:
+
 - no verification attempted
-- uses a some kind of list for DEBUG, without using the LIST module
-- relies on MEMB/CFS
 - some global variables
 - some code is activated/deactivated depending on macros
 
