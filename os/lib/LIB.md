@@ -204,3 +204,4 @@
 
 - no verification attempted
 - dependent on sys/cc and sys/ctimer
+- bit manipulation
