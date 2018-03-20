@@ -39,7 +39,39 @@
 
 #include "lib/ringbuf.h"
 #include <sys/cc.h>
+
+#ifdef __FRAMAC__
+#undef  CC_ACCESS_NOW
+#define CC_ACCESS_NOW(T, E) E
+#endif
+
+/*@
+    predicate Invariant(struct ringbuf *r) =
+	   \valid(r)
+	&& \valid(r->data+(0..r->mask))
+	&& \separated(r,r->data+(0..r->mask))
+	&& r->mask < 256
+	&& (\exists integer i; 0<=i<8 && r->mask == (1<<i)-1)
+	&& r->put_ptr <= r->mask
+	&& r->get_ptr <= r->mask ;
+*/
+
+// probably needs to be shown with Coq:
+/*@
+  lemma lem1:
+  \forall integer p, uint8_t q; 0 <= (uint8_t)(p & q) <= q;
+*/
+
 /*---------------------------------------------------------------------------*/
+/*@
+    requires \valid(r);
+    requires \valid(dataptr+(0..size-1));
+    requires \separated(r,dataptr+(0..size-1));
+    requires 0 < size < 256;
+    requires \exists integer i; 0<=i<8 && size == (1<<i);
+    assigns  *r;
+    ensures  Invariant(r);
+*/
 void
 ringbuf_init(struct ringbuf *r, uint8_t *dataptr, uint8_t size)
 {
@@ -49,6 +81,11 @@ ringbuf_init(struct ringbuf *r, uint8_t *dataptr, uint8_t size)
   r->get_ptr = 0;
 }
 /*---------------------------------------------------------------------------*/
+/*@
+    requires Invariant(r);
+    assigns  *(r->data+(0..r->mask)), r->put_ptr;
+    ensures  Invariant(r);
+*/
 int
 ringbuf_put(struct ringbuf *r, uint8_t c)
 {
@@ -76,6 +113,11 @@ ringbuf_put(struct ringbuf *r, uint8_t c)
   return 1;
 }
 /*---------------------------------------------------------------------------*/
+/*@
+    requires Invariant(r);
+    assigns  r->get_ptr;
+    ensures  Invariant(r);
+ */
 int
 ringbuf_get(struct ringbuf *r)
 {
@@ -109,12 +151,24 @@ ringbuf_get(struct ringbuf *r)
   }
 }
 /*---------------------------------------------------------------------------*/
+/*@
+  requires Invariant(r);
+  assigns  \nothing;
+  ensures  Invariant(r);
+  ensures  \result == r->mask + 1;
+ */
 int
 ringbuf_size(struct ringbuf *r)
 {
   return r->mask + 1;
 }
 /*---------------------------------------------------------------------------*/
+/*@
+  requires Invariant(r);
+  assigns  \nothing;
+  ensures  Invariant(r);
+  ensures  0 <= \result <= r->mask;
+ */
 int
 ringbuf_elements(struct ringbuf *r)
 {

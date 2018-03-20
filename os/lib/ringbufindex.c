@@ -45,7 +45,34 @@
 #include <string.h>
 #include "lib/ringbufindex.h"
 
+// invariant similar as in ringbuf.c:
+/*@
+    predicate Invariant(struct ringbufindex *r) =
+           \valid(r)
+        && r->mask < 256
+        && (\exists integer i; 0<=i<8 && r->mask == (1<<i)-1)
+        && r->put_ptr <= r->mask
+        && r->get_ptr <= r->mask ;
+*/
+
+
+// same lemma as in ringbuf.c, probably needs to be shown with Coq:
+/*@
+  lemma lem1:
+  \forall integer p, uint8_t q; 0 <= (uint8_t)(p & q) <= q;
+*/
+
+
+
 /* Initialize a ring buffer. The size must be a power of two */
+/*@
+    requires \valid(r);
+    requires 0 < size < 256;
+    requires \exists integer i; 0<=i<8 && size == (1<<i);
+    assigns  *r;
+    ensures  Invariant(r);
+
+*/
 void
 ringbufindex_init(struct ringbufindex *r, uint8_t size)
 {
@@ -53,7 +80,13 @@ ringbufindex_init(struct ringbufindex *r, uint8_t size)
   r->put_ptr = 0;
   r->get_ptr = 0;
 }
+
 /* Put one element to the ring buffer */
+/*@
+    requires Invariant(r);
+    assigns  r->put_ptr;
+    ensures  Invariant(r);
+*/
 int
 ringbufindex_put(struct ringbufindex *r)
 {
@@ -72,8 +105,14 @@ ringbufindex_put(struct ringbufindex *r)
   r->put_ptr = (r->put_ptr + 1) & r->mask;
   return 1;
 }
+
 /* Check if there is space to put an element.
  * Return the index where the next element is to be added */
+/*@
+    requires Invariant(r);
+    assigns  \nothing;
+    ensures  Invariant(r);
+*/
 int
 ringbufindex_peek_put(const struct ringbufindex *r)
 {
@@ -85,7 +124,13 @@ ringbufindex_peek_put(const struct ringbufindex *r)
   }
   return r->put_ptr;
 }
+
 /* Remove the first element and return its index */
+/*@
+    requires Invariant(r);
+    assigns  r->get_ptr;
+    ensures  Invariant(r);
+*/
 int
 ringbufindex_get(struct ringbufindex *r)
 {
@@ -109,8 +154,15 @@ ringbufindex_get(struct ringbufindex *r)
     return -1;
   }
 }
+
 /* Return the index of the first element
  * (which will be removed if calling ringbufindex_peek) */
+/*@
+    requires Invariant(r);
+    assigns  \nothing;
+    ensures  Invariant(r);
+*/
+
 int
 ringbufindex_peek_get(const struct ringbufindex *r)
 {
@@ -123,25 +175,51 @@ ringbufindex_peek_get(const struct ringbufindex *r)
     return -1;
   }
 }
+
 /* Return the ring buffer size */
+/*@
+  requires Invariant(r);
+  assigns  \nothing;
+  ensures  Invariant(r);
+  ensures  \result == r->mask + 1;
+ */
 int
 ringbufindex_size(const struct ringbufindex *r)
 {
   return r->mask + 1;
 }
+
 /* Return the number of elements currently in the ring buffer */
+/*@
+  requires Invariant(r);
+  assigns  \nothing;
+  ensures  Invariant(r);
+  ensures  0 <= \result <= r->mask;
+ */
 int
 ringbufindex_elements(const struct ringbufindex *r)
 {
   return (r->put_ptr - r->get_ptr) & r->mask;
 }
+
 /* Is the ring buffer full? */
+/*@
+  requires Invariant(r);
+  assigns  \nothing;
+  ensures  Invariant(r);
+ */
 int
 ringbufindex_full(const struct ringbufindex *r)
 {
   return ((r->put_ptr - r->get_ptr) & r->mask) == r->mask;
 }
+
 /* Is the ring buffer empty? */
+/*@
+  requires Invariant(r);
+  assigns  \nothing;
+  ensures  Invariant(r);
+ */
 int
 ringbufindex_empty(const struct ringbufindex *r)
 {

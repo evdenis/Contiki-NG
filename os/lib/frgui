@@ -1,0 +1,72 @@
+#!/bin/sh
+# Call:	fr [OPTIONS...] FILES...
+# Run frama-c with the given OPTIONS on the given FILES
+
+set -x
+
+FRAMAC_SHARE=$(frama-c-config -print-share-path)
+
+# first, create coq driver
+if [ ! -f Lemmas.vo ] || [ Lemmas.v -nt Lemmas.vo ]
+then
+	coqc -R $FRAMAC_SHARE/wp/coqwp "" Lemmas.v
+fi
+
+# cc options obtained from output of "make -n" 
+# in directory contiki/examples/hello-world/
+
+frama-c-gui				\
+	-cpp-command="cc -C -E"\
+" -DCONTIKI=1"\
+" -DCONTIKI_TARGET_NATIVE=1"\
+" -DNETSTACK_CONF_WITH_IPV6=1"\
+" -I/usr/local/include"\
+" -I."\
+" -I../../arch/platform/native/."\
+" -I../../arch/platform/native/dev"\
+" -I../../arch/platform/native/ctk"\
+" -I../../arch/cpu/native/."\
+" -I../../arch/cpu/native/net"\
+" -I../../arch/cpu/native/dev"\
+" -I../../os/dev"\
+" -I../../os/lib"\
+" -I../../os/net"\
+" -I../../os/net/llsec"\
+" -I../../os/net/mac"\
+" -I../../os/net/rime"\
+" -I../../os/net/rpl"\
+" -I../../os/sys"\
+" -I../../os/cfs"\
+" -I../../os/ctk"\
+" -I../../os/lib/ctk"\
+" -I../../os/loader"\
+" -I../../os/."\
+" -I../../os/sys"\
+" -I../../os/dev"\
+" -I../../os/lib"\
+" -I../../os/net/ipv6"\
+" -I../../os/net/ip"\
+" -I../../os/net/rpl"\
+" -I../../os/net"\
+" -I../../os/net/mac"\
+" -I../../os/ctk"\
+" -I../../os/net/llsec"\
+" -I../../arch/platform/native/"\
+" -I../.."\
+" -DCONTIKI_VERSION_STRING=\"Contiki-3.x-3214-gedb3046\""	\
+	-wp					\
+	-wp-rte					\
+	-wp-out wp-out				\
+	-wp-driver external.driver		\
+	-wp-script wp0.script			\
+	-wp-prover alt-ergo			\
+	-wp-prover cvc4				\
+	-wp-prover coq				\
+	"$@"
+
+exit
+
+
+
+rm -rf wp-out
+
