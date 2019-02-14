@@ -1,0 +1,11 @@
+job:
+  tags:
+    - framac
+  script:
+    - extricate --type contiki --config verif/contiki_extricate.conf --done verif/contiki_status.conf --kernel . --module os/lib/
+    - compare_verdicts verif/verdicts.txt verif/new_verdicts.txt
+  artifacts:
+    paths:
+      - verif/new_verdicts.txt
+    expire_in: 1 week
+

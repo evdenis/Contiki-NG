@@ -1,0 +1,4 @@
+VERDICT: galois_mul2 PARTIALLY PROVED (3/6)
+VERDICT: set_key PROVED
+VERDICT: encrypt PROVED
+VERDICT: aes_128_set_padded_key PROVED
