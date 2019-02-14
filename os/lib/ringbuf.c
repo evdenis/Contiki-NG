@@ -45,21 +45,20 @@
 #define CC_ACCESS_NOW(T, E) E
 #endif
 
-/*@
-    predicate Invariant(struct ringbuf *r) =
+/*@ axiomatic RingBuf {
+    predicate RingBufInvariant(struct ringbuf *r) =
 	   \valid(r)
 	&& \valid(r->data+(0..r->mask))
 	&& \separated(r,r->data+(0..r->mask))
 	&& r->mask < 256
 	&& (\exists integer i; 0<=i<8 && r->mask == (1<<i)-1)
 	&& r->put_ptr <= r->mask
-	&& r->get_ptr <= r->mask ;
-*/
+	&& r->get_ptr <= r->mask;
 
-// probably needs to be shown with Coq:
-/*@
-  lemma lem1:
-  \forall integer p, uint8_t q; 0 <= (uint8_t)(p & q) <= q;
+    // probably needs to be shown with Coq:
+    lemma lem1:
+       \forall integer p, uint8_t q; 0 <= (uint8_t)(p & q) <= q;
+    }
 */
 
 /*---------------------------------------------------------------------------*/
@@ -70,7 +69,7 @@
     requires 0 < size < 256;
     requires \exists integer i; 0<=i<8 && size == (1<<i);
     assigns  *r;
-    ensures  Invariant(r);
+    ensures  RingBufInvariant(r);
 */
 void
 ringbuf_init(struct ringbuf *r, uint8_t *dataptr, uint8_t size)
@@ -82,9 +81,9 @@ ringbuf_init(struct ringbuf *r, uint8_t *dataptr, uint8_t size)
 }
 /*---------------------------------------------------------------------------*/
 /*@
-    requires Invariant(r);
+    requires RingBufInvariant(r);
     assigns  *(r->data+(0..r->mask)), r->put_ptr;
-    ensures  Invariant(r);
+    ensures  RingBufInvariant(r);
 */
 int
 ringbuf_put(struct ringbuf *r, uint8_t c)
@@ -114,9 +113,9 @@ ringbuf_put(struct ringbuf *r, uint8_t c)
 }
 /*---------------------------------------------------------------------------*/
 /*@
-    requires Invariant(r);
+    requires RingBufInvariant(r);
     assigns  r->get_ptr;
-    ensures  Invariant(r);
+    ensures  RingBufInvariant(r);
  */
 int
 ringbuf_get(struct ringbuf *r)
@@ -152,9 +151,9 @@ ringbuf_get(struct ringbuf *r)
 }
 /*---------------------------------------------------------------------------*/
 /*@
-  requires Invariant(r);
+  requires RingBufInvariant(r);
   assigns  \nothing;
-  ensures  Invariant(r);
+  ensures  RingBufInvariant(r);
   ensures  \result == r->mask + 1;
  */
 int
@@ -164,9 +163,9 @@ ringbuf_size(struct ringbuf *r)
 }
 /*---------------------------------------------------------------------------*/
 /*@
-  requires Invariant(r);
+  requires RingBufInvariant(r);
   assigns  \nothing;
-  ensures  Invariant(r);
+  ensures  RingBufInvariant(r);
   ensures  0 <= \result <= r->mask;
  */
 int
