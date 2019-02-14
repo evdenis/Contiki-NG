@@ -59,21 +59,24 @@ static const int8_t SIN_TAB[] = {
  -69,-63,-58,-52,-45,-39,-33,-26,-20,-13,-6
 };
 
-/*@
-  lemma lem2:	\forall integer x,y,z;	0 < x && 0 <= y < z		==> (x<<y) < (x<<z);
-  lemma lem2b:	\forall integer x,y,z;	0 <= x && 0 <= z < y		==> (x>>y) < (x>>z);
-  lemma lem2c:	\forall integer x,y,z;	0 <= x <= y && 0 <= z		==> (x>>z) <= (y>>z);
-  lemma lem2d:	\forall integer x,y,z;	x < (1<<y) && 0 <= z <= y	==> (x>>z) < (1<<(y-z));
-  lemma lem3:	\forall integer x,y,z;	0 <= x < (1<<y) && 0 <= y	==> (x<<1)+1 < (1<<(y+1));
-  lemma lem4:	\forall integer x;	0 <= x				==> (1<<x) / 2 == 1<<(x-1);
-  lemma lem4b:	\forall integer x,y;	0 <= x < y			==> (1<<x)>>y == 0;
-  lemma lem5:	\forall integer x,y;	0 <= x && 0 <= y		==> (1<<(x+y)) == (1<<x) * (1<<y);
-  lemma lem5b:	\forall integer x,y;	0 <= y <= x			==> (1<<x) == (1<<y) * (1<<(x-y));
-  lemma lem6:	\forall integer x;	0 <= x <= 32767			==> 0 <= (x<<1) <= 65534;
-  lemma lem7:	\forall integer x,y,z;	0 <= x && 0 <= z <= y		==> (x<<y)>>z == x << (y-z);
+/*@ axiomatic BitLemmas {
+    predicate importBitLemmas = \true;
+    lemma lem2:	 \forall integer x,y,z;	0 < x && 0 <= y < z		==> (x<<y) < (x<<z);
+    lemma lem2b: \forall integer x,y,z;	0 <= x && 0 <= z < y		==> (x>>y) < (x>>z);
+    lemma lem2c: \forall integer x,y,z;	0 <= x <= y && 0 <= z		==> (x>>z) <= (y>>z);
+    lemma lem2d: \forall integer x,y,z;	x < (1<<y) && 0 <= z <= y	==> (x>>z) < (1<<(y-z));
+    lemma lem3:	 \forall integer x,y,z;	0 <= x < (1<<y) && 0 <= y	==> (x<<1)+1 < (1<<(y+1));
+    lemma lem4:	 \forall integer x;	0 <= x				==> (1<<x) / 2 == 1<<(x-1);
+    lemma lem4b: \forall integer x,y;	0 <= x < y			==> (1<<x)>>y == 0;
+    lemma lem5:	 \forall integer x,y;	0 <= x && 0 <= y		==> (1<<(x+y)) == (1<<x) * (1<<y);
+    lemma lem5b: \forall integer x,y;	0 <= y <= x			==> (1<<x) == (1<<y) * (1<<(x-y));
+    lemma lem6:  \forall integer x;	0 <= x <= 32767			==> 0 <= (x<<1) <= 65534;
+    lemma lem7:  \forall integer x,y,z;	0 <= x && 0 <= z <= y		==> (x<<y)>>z == x << (y-z);
+    }
 */
 
 /*@
+  requires importBitLemmas;
   requires nu < 16;
   assigns \nothing;
   ensures bitrev: a: \result < (1<<nu);
@@ -124,6 +127,7 @@ static int16_t cosI(uint16_t angleMilli)
 }
 
 /*@
+  requires importBitLemmas;
   behavior general:	// minimal contract of ilog2 itself
     requires val < 1<<16;
     assigns  \nothing;
@@ -183,6 +187,7 @@ static uint16_t ilog2(uint16_t val)
    calculations.
 */
 /*@
+  requires importBitLemmas;
   requires \exists integer b; 1 <= b && n == (1<<b);
   requires \valid(xre+(0..n-1));
   requires \valid(xim+(0..n-1));
@@ -357,5 +362,5 @@ ifft(int16_t xre[], int16_t xim[], uint16_t n)
 
   // XXX poor man's check for consistency of lemmas -
   // XXX don't move it up in the file
-  //@ assert check: \false;
+  // assert check: \false;
 }
