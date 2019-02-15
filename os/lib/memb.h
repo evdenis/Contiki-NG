@@ -100,11 +100,20 @@ struct memb {
   void *mem;
 };
 
+#include "logic_defs_memb.h"
+
 /**
  * Initialize a memory block that was declared with MEMB().
  *
  * \param m A memory block previously declared with MEMB().
  */
+/*@
+  requires valid_memb(m);
+  ensures valid_memb(m);
+  ensures _memb_empty(m);
+  assigns m->count[0 .. (m->num - 1)];
+  assigns *((char*) m->mem + (0 .. (m->size * m->num - 1)));
+*/
 void  memb_init(struct memb *m);
 
 /**
@@ -112,6 +121,29 @@ void  memb_init(struct memb *m);
  *
  * \param m A memory block previously declared with MEMB().
  */
+/*@
+  requires valid_memb(m);
+  ensures valid_memb(m);
+  assigns m->count[0 .. (m->num - 1)];
+  behavior free_found:
+    assumes \exists integer i; 0 <= i < m->num && m->count[i] == 0;
+    ensures \exists integer i;
+      0 <= i < m->num &&
+      \old(m->count[i]) == 0 &&
+      m->count[i] == 1 &&
+      \result == (char*) m->mem + (i * m->size) &&
+      \forall integer j; (0 <= j < i || i < j < m->num) ==> m->count[j] == \old(m->count[j]);
+    ensures \valid((char*) \result + (0 .. (m->size - 1)));
+    ensures _memb_numfree(m) == \old(_memb_numfree(m)) - 1;
+    ensures _memb_allocated(m, \result);
+  behavior full:
+    assumes _memb_full(m);
+    ensures \forall integer i; 0 <= i < m->num ==> m->count[i] == \old(m->count[i]);
+    ensures _memb_numfree(m) == \old(_memb_numfree(m));
+    ensures \result == NULL;
+  complete behaviors;
+  disjoint behaviors;
+*/
 void *memb_alloc(struct memb *m);
 
 /**
@@ -126,10 +158,42 @@ void *memb_alloc(struct memb *m);
  * if successfully deallocated) or -1 if the pointer "ptr" did not
  * point to a legal memory block.
  */
+/*@
+  requires valid_memb(m);
+  ensures valid_memb(m);
+  assigns m->count[_memb_index(m, ptr)];
+  behavior alloc_found:
+    assumes _memb_has(m, ptr) && _memb_allocated(m, ptr);
+    ensures !_memb_allocated(m, ptr);
+    ensures _memb_numfree(m) == \old(_memb_numfree(m)) + 1;
+    ensures \result == 0;
+  behavior already_free:
+    assumes _memb_has(m, ptr) && !_memb_allocated(m, ptr);
+    ensures !_memb_allocated(m, ptr);
+    ensures _memb_numfree(m) == \old(_memb_numfree(m));
+    ensures \result == 0;
+  behavior elem_notfound:
+    assumes !_memb_has(m, ptr);
+    ensures m->count[_memb_index(m, ptr)] == \old(m->count[_memb_index(m, ptr)]);
+    ensures _memb_numfree(m) == \old(_memb_numfree(m));
+    ensures \result == -1;
+  complete behaviors;
+  disjoint behaviors;
+*/
 char  memb_free(struct memb *m, void *ptr);
 
+/*@
+  requires valid_memb(m);
+  ensures \result <==> (m->mem <= ptr && (char*) ptr < (char*) m->mem + (m->num * m->size));
+  assigns \nothing;
+*/
 int memb_inmemb(struct memb *m, void *ptr);
 
+/*@
+  requires valid_memb(m);
+  ensures \result == _memb_numfree(m);
+  assigns \nothing;
+*/
 int  memb_numfree(struct memb *m);
 
 /** @} */

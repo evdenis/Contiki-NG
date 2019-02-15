@@ -17,6 +17,17 @@ Require Import Cbits.
 
 Open Local Scope Z_scope.
 
+Lemma mult_simplification:
+  forall (i_1 i : Z),
+  ((0 < i)%Z) ->
+  ((0 <= i_1)%Z) ->
+  ((((Cdiv (i * i_1) i)) = i_1)%Z).
+Proof.
+  intros. destruct(Cdiv_cases (i*i_1) i) as [HH _].
+  now rewrite HH, Z.mul_comm, Z_div_mult 
+    by (try apply Z.le_ge; auto with zarith).
+Qed.
+
 (* lemmas used to prove gcr *)
 Lemma lsl_to_pow2:
   forall (a b : Z),
