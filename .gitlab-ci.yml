@@ -1,3 +1,7 @@
+before_script:
+  - export FRAMAC_SHARE=$(frama-c-config -print-share-path)
+  - coqc -R $FRAMAC_SHARE/wp/coqwp "" verif/Lemmas.v
+
 job:
   tags:
     - framac
