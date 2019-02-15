@@ -11,5 +11,7 @@ job:
   artifacts:
     paths:
       - verif/new_verdicts.txt
+      - wp-out
+      - result
     expire_in: 1 week
 
