@@ -1,24 +1,13 @@
 VERDICT: bitrev PARTIALLY PROVED (15/27)
 VERDICT: crc16_add PARTIALLY PROVED (6/9)
-VERDICT: galois_mul2 PARTIALLY PROVED (3/6)
 VERDICT: ifft PARTIALLY PROVED (259/270)
 VERDICT: ilog2 PARTIALLY PROVED (28/40)
 VERDICT: memb_alloc PARTIALLY PROVED (81/82)
 VERDICT: mic PARTIALLY PROVED (106/111)
-VERDICT: ringbuf_elements PARTIALLY PROVED (7/9)
-VERDICT: ringbuf_get PARTIALLY PROVED (16/18)
-VERDICT: ringbuf_init PARTIALLY PROVED (10/11)
-VERDICT: ringbuf_put PARTIALLY PROVED (17/19)
-VERDICT: ringbuf_size PARTIALLY PROVED (5/6)
-VERDICT: ringbufindex_elements PARTIALLY PROVED (7/9)
-VERDICT: ringbufindex_empty PARTIALLY PROVED (6/7)
-VERDICT: ringbufindex_full PARTIALLY PROVED (8/9)
-VERDICT: ringbufindex_get PARTIALLY PROVED (15/16)
-VERDICT: ringbufindex_init PARTIALLY PROVED (8/9)
-VERDICT: ringbufindex_peek_get PARTIALLY PROVED (9/10)
-VERDICT: ringbufindex_peek_put PARTIALLY PROVED (10/11)
-VERDICT: ringbufindex_put PARTIALLY PROVED (14/15)
-VERDICT: ringbufindex_size PARTIALLY PROVED (5/6)
+VERDICT: ringbuf_elements PARTIALLY PROVED (8/9)
+VERDICT: ringbuf_get PARTIALLY PROVED (17/18)
+VERDICT: ringbuf_put PARTIALLY PROVED (18/19)
+VERDICT: ringbufindex_elements PARTIALLY PROVED (8/9)
 VERDICT: aead PROVED
 VERDICT: aes_128_set_padded_key PROVED
 VERDICT: cosI PROVED
@@ -26,10 +15,21 @@ VERDICT: crc16_data PROVED
 VERDICT: ctr PROVED
 VERDICT: ctr_step PROVED
 VERDICT: encrypt PROVED
-VERDICT: memb_init PROVED
+VERDICT: galois_mul2 PROVED
 VERDICT: memb_free PROVED
+VERDICT: memb_init PROVED
 VERDICT: memb_inmemb PROVED
 VERDICT: memb_numfree PROVED
+VERDICT: ringbuf_init PROVED
+VERDICT: ringbuf_size PROVED
+VERDICT: ringbufindex_empty PROVED
+VERDICT: ringbufindex_full PROVED
+VERDICT: ringbufindex_get PROVED
+VERDICT: ringbufindex_init PROVED
+VERDICT: ringbufindex_peek_get PROVED
+VERDICT: ringbufindex_peek_put PROVED
+VERDICT: ringbufindex_put PROVED
+VERDICT: ringbufindex_size PROVED
 VERDICT: set_iv PROVED
 VERDICT: set_key PROVED
 VERDICT: sinI PROVED
