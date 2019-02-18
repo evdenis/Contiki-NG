@@ -126,29 +126,547 @@
        list_init((struct_ptr)->name);                                   \
     } while(0)
 
+#include "lib/spec_list.h"
+
 /**
  * The linked list type.
  *
  */
 typedef void ** list_t;
 
+/*@
+  requires \valid(list);
+  requires ValidArray : \valid( array + (0 .. MAX_SIZE - 1) );
+
+  requires GhostSeparation:
+    \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  requires 
+    \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+
+  assigns  *list ;
+
+  ensures ValidArray : \valid( array + (0 .. MAX_SIZE - 1) );
+
+  ensures GhostSeparation:
+    \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  ensures 
+    \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+
+  ensures  linked_n(*list, array, 0, 0, *list);
+  ensures  *list == NULL;
+*/
 void   list_init(list_t list);
+/*@
+  requires \valid(list);
+  requires linked_n(*list, array, index, n, NULL);
+  assigns \nothing ;
+
+  behavior empty:
+    assumes *list == NULL;
+    ensures \result == NULL;
+
+  behavior not_empty:
+    assumes *list != NULL;
+    ensures \result == array[index];
+ */
 void * list_head(list_t list);
+/*@
+  requires \valid(list);
+  requires ValidArray : \valid( array + (0 .. MAX_SIZE - 1) );
+  requires linked_n(*list, array, index, n, NULL);
+  assigns \nothing ;
+
+  behavior empty:
+    assumes *list == NULL;
+    ensures \result == NULL;
+
+  behavior not_empty:
+    assumes *list != NULL;
+    ensures \result == array[index+n-1];
+    ensures \result != NULL;
+    ensures linked_n(*list, array, index, n-1, \result);
+  
+  complete behaviors;
+  disjoint behaviors;
+ */
 void * list_tail(list_t list);
+/*@
+  requires \valid(list);
+  requires Linked : linked_n (*list, array, index, n, NULL);
+  requires ValidArray : \valid( array + (0 .. MAX_SIZE - 1) );
+  requires 0 <= index ;
+
+  requires GhostSeparation:
+    \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  requires 
+    \separated(list, *(array + (index .. index + n - 1))) ;
+  requires 
+    \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+
+  requires Separation:
+    \forall integer y ; 
+      index <= y < index + n ==> 
+        \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+
+  requires Separation:
+    \forall integer y, z; 
+      index <= y < index + n && index <= z < index + n && y != z ==> 
+        \separated(* (array+y), *(array+z));
+
+  requires Unique:
+    \forall integer y, z; 
+      index <= y < index + n && index <= z < index + n && y != z ==> 
+        array[y] != array[z];
+
+  ensures \result == \at(*list, Pre);
+
+  ensures GhostSeparation:
+    \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  ensures 
+    \separated(list, *(array + (index .. index + n - 1))) ;
+  ensures 
+    \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+
+  behavior empty :
+    assumes n == 0;
+
+    ensures *list == \at(*list, Pre);
+    ensures linked_n (*list, array, index, n, NULL);
+    ensures unchanged{Pre, Post} (array, index, index + n);
+    ensures \result == \null;
+
+    ensures Unique:
+      \forall integer y, z; 
+        index <= y < index + n && index <= z < index + n && y != z ==> 
+          array[y] != array[z];
+
+    ensures Separation:
+      \forall integer y ; 
+        index <= y < index + n ==> 
+          \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+
+    ensures Separation:
+      \forall integer y, z; 
+        index <= y < index + n && index <= z < index + n && y != z ==> 
+          \separated(* (array+y), *(array+z));
+    
+    assigns \nothing;
+
+
+  behavior more:
+    assumes n >= 1;
+
+    ensures *list == \at((*list)->next, Pre);
+    ensures array_swipe_left{Pre, Post} (array, index, index + n - 1);
+    ensures linked_n (*list, array, index, n - 1, NULL);
+    
+    ensures Unique:
+      \forall integer y, z; 
+        index <= y < index + n - 1 && index <= z < index + n - 1 && y != z ==> 
+          array[y] != array[z];
+
+    ensures Separation : 
+      \forall integer y; 
+        index <= y < index + n - 1 ==> 
+          \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+
+    ensures Separation:
+      \forall integer y, z; 
+        index <= y < index + n - 1 && index <= z < index + n - 1 && y != z ==> 
+          \separated(* (array+y), *(array+z));
+
+    ensures NoMoreHere:
+      \forall integer x ; index <= x < index+n-1 ==> array[x] != \result ;
+
+    ensures NoMoreHere:
+      \forall integer x ; index <= x < index+n-1 ==> \separated(array[x], \result);
+
+
+    assigns *list, array[index .. index + n-2];
+        
+  complete behaviors;
+  disjoint behaviors;
+*/
 void * list_pop (list_t list);
+/*@
+  requires \valid( list ) && \valid(item) ;
+  requires \separated(list, item) ;
+  requires Linked : linked_n (*list, array, index, n, NULL);
+  requires ValidArray : \valid(array + (0 .. MAX_SIZE-1));
+  requires 0 <= index && 0 <= n < MAX_SIZE ;
+  requires EnoughSpace : index + n + 1 <= MAX_SIZE; 
+
+  requires GhostSeparation: \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  requires GhostSeparation: \separated(list, *(array + (index .. index + n - 1))) ;
+  requires GhostSeparation: \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+
+  requires \separated(item, array + (0 .. MAX_SIZE - 1)) ;
+  requires Item_Separation:
+    \forall integer i ; index <= i < index + n ==> 
+      item != array[i] ==> \separated(item, array[i]);
+
+  requires Separation: 
+    \forall integer y ; 
+      index <= y < index + n ==> 
+        \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+
+  requires Separation : 
+    \forall integer y, z; 
+      index <= y < index + n && index <= z < index + n && y != z ==> 
+        \separated( * (array + y), * (array + z) );
+
+  requires Unique:
+    \forall integer y, z; 
+      index <= y < index + n && index <= z < index + n && y != z ==> 
+        array[y] != array[z];
+
+  requires item_idx == index_of(item, array, index, index+n) ;
+
+  assigns array[index .. index + n], array[item_idx - 1]->next, 
+          item->next, *list ;
+
+  ensures GhostSeparation: \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  ensures GhostSeparation: \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+
+  behavior contains_item:
+    assumes \exists integer i ; index <= i < index+n && array[i] == item ;
+    ensures linked_n(*list, array, index, n, NULL);
+    ensures unchanged{Pre,Post}(array, item_idx + 1, index+n);
+    ensures array_swipe_right{Pre, Post}(array, index + 1, item_idx + 1);
+    ensures array[index] == item ;
+
+    ensures GhostSeparation: \separated(list, *(array + (index .. index + n - 1))) ;
+
+    ensures Separation : 
+      \forall integer y ; index <= y < index + n  ==> 
+          \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+
+    ensures Separation : 
+      \forall integer y, z; 
+        index <= y < index + n && index <= z < index + n && y != z ==> 
+          \separated( * (array + y), * (array + z) );
+
+    ensures Unique:
+      \forall integer y, z; 
+        index <= y < index + n && index <= z < index + n && y != z ==> 
+          array[y] != array[z];
+
+  behavior does_not_contain_item:
+    assumes \forall integer i ; index <= i < index+n ==> array[i] != item ;
+    ensures linked_n(*list, array, index, n+1, NULL);
+    ensures array_swipe_right{Pre, Post}(array, index + 1, index + n + 1);
+    ensures array[index] == item ;
+
+    ensures GhostSeparation: \separated(list, *(array + (index .. index + n))) ;
+
+    ensures Separation : 
+      \forall integer y ; index <= y < index + n + 1 ==> 
+          \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+
+    ensures Separation : 
+      \forall integer y, z; 
+        index <= y < index + n + 1 && index <= z < index + n + 1 && y != z ==> 
+          \separated( * (array + y), * (array + z) );
+
+    ensures Unique:
+      \forall integer y, z; 
+        index <= y < index + n + 1 && index <= z < index + n + 1 && y != z ==> 
+          array[y] != array[z];
+  
+  complete behaviors ;
+  disjoint behaviors ;
+*/
 void   list_push(list_t list, void *item);
 
+/*@
+  requires \valid(list);
+  requires \valid(array + (0 .. MAX_SIZE - 1));
+  requires linked_n(*list, array, index, size, NULL);
+  
+  requires GhostSeparation: \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  requires GhostSeparation: \separated(list, *(array + (index .. index + size - 1))) ;
+  requires GhostSeparation: \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+
+  requires Separation : 
+    \forall integer y ; 
+      index <= y < index + size ==> 
+        \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+
+  requires Separation:
+    \forall integer y, z; 
+      index <= y < index + size && index <= z < index + size && y != z ==> 
+        \separated(* (array+y), *(array+z));
+
+  requires Unique:
+    \forall integer y, z; 
+      index <= y < index + size && index <= z < index + size && y != z ==> 
+        array[y] != array[z];
+
+  assigns *list, array[index+size-2]->next ;
+  
+  ensures GhostSeparation: \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  ensures GhostSeparation: \separated(list, *(array + (index .. index + size - 1))) ;
+  ensures GhostSeparation: \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+
+  ensures unchanged{Pre, Here}(array, index, index + size - 2);
+
+  ensures Separation : 
+    \forall integer y ; 
+      index <= y < index + size - 1 ==> 
+        \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+
+  ensures Separation:
+    \forall integer y, z; 
+      index <= y < index + size - 1 && index <= z < index + size - 1 && y != z ==> 
+        \separated(* (array+y), *(array+z));
+
+  ensures Unique:
+    \forall integer y, z; 
+      index <= y < index + size - 1 && index <= z < index + size - 1 && y != z ==> 
+        array[y] != array[z];
+
+  behavior empty:
+    assumes size == 0;
+    ensures \result == NULL;
+    ensures *list == \old(*list);
+
+  behavior one:
+    assumes size == 1;
+    ensures \result == array[index];
+    ensures *list == NULL ; 
+    ensures linked_n(*list, array, index, 0, NULL);
+    
+  behavior more:
+    assumes size > 1;
+    ensures \result == array[index+size-1];
+    ensures array[index+size-2]->next == NULL;
+    ensures linked_n(*list, array, index, size-1, NULL);
+    ensures *list == \old(*list);
+     
+  disjoint behaviors;
+  complete behaviors;
+*/
 void * list_chop(list_t list);
 
+/*@
+  requires \valid( list ) && \valid(item) ;
+  requires \separated(list, item) ;
+  requires Linked : linked_n (*list, array, index, n, NULL);
+  requires ValidArray : \valid(array + (0 .. MAX_SIZE-1));
+  requires 0 <= index < MAX_SIZE && 0 <= n < MAX_SIZE ;
+  requires index+n < MAX_SIZE ;
+
+  requires GhostSeparation: \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  requires GhostSeparation: \separated(list, *(array + (index .. index + n - 1))) ;
+  requires GhostSeparation: \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+
+  requires \separated(item, array + (0 .. MAX_SIZE - 1)) ;
+  requires Item_Separation:
+    \forall integer i ; index <= i < index + n ==> 
+      item != array[i] ==> \separated(item, array[i]);  
+
+  requires Separation: 
+    \forall integer y ; 
+      index <= y < index + n ==> 
+        \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+  requires Separation : 
+    \forall integer y, z; 
+      index <= y < index + n && index <= z < index + n && z != y ==> 
+        \separated( * (array + y), * (array + z) );
+  requires Unique : 
+    \forall integer y, z; 
+      index <= y < index + n && index <= z < index + n && z != y ==> 
+        array[z] != array[y] ;
+
+  requires item_idx == index_of(item, array, index, index+n) ;
+
+  assigns array[item_idx .. index+n-1], array[item_idx - 1]->next, *list,
+          array[index + n - 1]->next, array[index + n - 2]->next,
+	  array[index + n], array[index + n - 1],
+	  item->next ;
+
+  ensures GhostSeparation: \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  ensures GhostSeparation: \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+
+  behavior contains_item:
+    assumes \exists integer i ; index <= i < index+n && array[i] == item ;
+    ensures linked_n(*list, array, index, n, NULL);
+    ensures unchanged{Pre,Post}(array, index, item_idx - 1);
+    ensures array_swipe_left{Pre,Post}(array, item_idx, index + n - 1);
+    ensures array[index+n-1] == item ;
+    ensures item_idx > index ==> array[item_idx-1] == \old(array[item_idx-1]) ;
+
+    ensures GhostSeparation: \separated(list, *(array + (index .. index + n - 1))) ;
+
+    ensures Separation : 
+      \forall integer y ; index <= y < index + n ==> 
+          \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+
+    ensures Separation : 
+      \forall integer y, z; 
+        index <= y < index + n && index <= z < index + n && z != y ==> 
+          \separated( * (array + y), * (array + z) );
+
+    ensures Unique:
+      \forall integer y, z; 
+        index <= y < index + n && index <= z < index + n && z != y ==> 
+          array[z] != array[y] ;
+
+  behavior does_not_contain_item:
+    assumes \forall integer i ; index <= i < index+n ==> array[i] != item ;
+    ensures linked_n(*list, array, index, n+1, NULL);
+    ensures unchanged{Pre,Post}(array, index, index + n - 1);
+    ensures End: n > 0 ==> array[index+n-1] == \old(array[index+n-1]);
+    ensures array[index+n] == item ;
+
+    ensures GhostSeparation: \separated(list, *(array + (index .. index + n))) ;
+
+    ensures Separation : 
+      \forall integer y ; index <= y < index + n + 1 ==> 
+          \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+
+    ensures Separation : 
+      \forall integer y, z; 
+        index <= y < index + n + 1 && index <= z < index + n + 1 && z != y ==> 
+          \separated( * (array + y), * (array + z) );
+
+    ensures Unique:
+      \forall integer y, z; 
+        index <= y < index + n + 1 && index <= z < index + n + 1 && z != y ==> 
+          array[z] != array[y] ;
+
+  complete behaviors ;
+  disjoint behaviors ;
+*/
 void   list_add(list_t list, void *item);
+/*@
+  requires \valid( list ) && item != \null ;
+  requires Linked : linked_n (*list, array, index, n, NULL);
+  requires ValidArray : \valid(array + (0 .. MAX_SIZE-1));
+  requires 0 <= index && 0 <= n < MAX_SIZE ;
+
+  requires GhostSeparation: \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  requires GhostSeparation: \separated(list, *(array + (index .. index + n - 1))) ;
+  requires GhostSeparation: \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+  
+  requires Item_Separation:
+    \forall integer i ; index <= i < index + n ==> 
+      item != array[i] ==> \separated(item, array[i]);
+
+  requires Separation : 
+    \forall integer y ; 
+      index <= y < index + n ==> 
+        \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+
+  requires Separation : 
+    \forall integer y, z; 
+      index <= y < index + n && index <= z < index + n && y != z ==> 
+        \separated(* (array + y), * (array + z));
+
+  requires Unique:
+    \forall integer y, z; 
+      index <= y < index + n && index <= z < index + n && y != z ==> 
+        array[y] != array[z];
+
+  requires item_idx == index_of(item, array, index, index+n) ;
+
+  assigns array[item_idx .. index+n-1],
+          array[item_idx - 1]->next,
+	  *list ;
+
+  ensures GhostSeparation: \separated(list, array + (0 .. MAX_SIZE - 1)) ;
+  ensures GhostSeparation: \separated(*list, array + (0 .. MAX_SIZE - 1)) ;
+
+  ensures UnchangedItem: *item == \old(*item);
+
+  behavior contains_item:
+    assumes \exists integer i ; (index <= i < index+n) && array[i] == item ;
+    ensures Linked: linked_n(*list, array, index, n-1, NULL);
+    ensures ItemNotIn: \forall integer x ; index <= x < index+n-1 ==> array[x] != item ;
+    ensures IttemSep: \forall integer x ; index <= x < index+n-1 ==> \separated(item, array[x]) ;
+    ensures GhostSeparation: \separated(list, *(array + (index .. index + n - 2))) ;
+    ensures Separation : 
+      \forall integer y ; 
+        index <= y < index + n - 1 ==> 
+          \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+    ensures Separation : 
+      \forall integer y, z; 
+        index <= y < index + n - 1 && index <= z < index + n - 1 && y != z ==> 
+          \separated(* (array + y), * (array + z));
+    ensures Unique:
+      \forall integer y, z; 
+        index <= y < index + n - 1 && index <= z < index + n - 1 && y != z ==> 
+          array[y] != array[z];
+    ensures Unchanged: unchanged{Pre,Post}(array, index, item_idx - 1);
+    ensures Swiped: array_swipe_left{Pre,Post}(array, item_idx, index + n - 1);
+    ensures PrevItem: item_idx > index ==> array[item_idx - 1] == \old(array[item_idx - 1]);
+    ensures UnchangedSwipe: 
+      \forall integer i ; item_idx <= i < index + n - 1 ==>
+        \at(*array[i], Post) == \at(*array[i+1], Pre);
+
+  behavior does_not_contain_item:
+    assumes \forall integer i ; index <= i < index+n ==> array[i] != item ;
+    ensures linked_n(*list, array, index, n, NULL);
+    ensures \forall integer x ; index <= x < index+n ==> array[x] != item ;
+    ensures \forall integer x ; index <= x < index+n ==> \separated(item, array[x]) ;
+    ensures GhostSeparation: \separated(list, *(array + (index .. index + n - 1))) ;
+    ensures Separation : 
+      \forall integer y ; 
+        index <= y < index + n ==> 
+          \separated( * (array + y), array + (0 .. MAX_SIZE - 1));
+    ensures Separation : 
+      \forall integer y, z; 
+        index <= y < index + n && index <= z < index + n && y != z ==> 
+          \separated(* (array + y), * (array + z));
+    ensures Unique:
+      \forall integer y, z; 
+        index <= y < index + n && index <= z < index + n && y != z ==> 
+          array[y] != array[z];
+    ensures unchanged{Pre, Post}(array, index, index + n);
+
+  complete behaviors;
+  disjoint behaviors;
+*/
 void   list_remove(list_t list, void *item);
 
+/*@
+  requires \valid(list);
+  requires linked_n(*list, array, index, n, NULL);
+  
+  assigns \nothing;
+
+  ensures \result == n ;
+*/
 int    list_length(list_t list);
 
+/*@
+  requires ValidArray : \valid( array + (0 .. MAX_SIZE - 1) );
+  requires \valid(src) && \valid(dest);
+  requires linked_n(*src, array, index, n, NULL);
+  requires \separated(dest, array + (0 .. MAX_SIZE - 1));
+  requires \separated(dest, *(array + (index .. index + n - 1)));
+  requires \separated(*dest, array + (0 .. MAX_SIZE - 1 ));
+  assigns *dest;
+  ensures linked_n(*dest, array, index, n, NULL);
+  ensures linked_n(*src, array, index, n, NULL);
+*/
 void   list_copy(list_t dest, list_t src);
 
 void   list_insert(list_t list, void *previtem, void *newitem);
 
+/*@
+  requires linked_n (item, array, index, n, NULL);
+ 
+  assigns \nothing;
+
+  behavior empty:
+    assumes item == NULL ;
+    ensures \result == NULL ;
+    
+  behavior not_empty:
+    assumes item != NULL ;
+    ensures linked_n (\result, array, index+1, n-1, NULL);
+*/
 void * list_item_next(void *item);
 
 #endif /* LIST_H_ */

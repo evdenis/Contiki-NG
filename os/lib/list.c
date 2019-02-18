@@ -99,7 +99,11 @@ list_head(list_t list)
 void
 list_copy(list_t dest, list_t src)
 {
+  //@ ghost struct list* root = *src ;
+  //@ ghost linked_n_all_elements(root, NULL, array, index, n) ;
+
   *dest = *src;
+  //@ ghost stay_linked(Pre, Here, root, NULL, array, index, n) ;
 }
 /*---------------------------------------------------------------------------*/
 /**
