@@ -20,7 +20,7 @@ identifier list, item;
 typedef list_t;
 @@
 
-- void list_add(list_t list, struct list *item)
+- void list_add(list_t list, void *item)
 + void list_add(list_t list, struct list *item, /* ghost: */ struct list **array, int index, int n, int item_idx)
 {
   ...
@@ -74,7 +74,7 @@ typedef list_t;
 identifier item;
 @@
 
-- struct list *list_item_next(struct list *item)
+- struct list *list_item_next(void *item)
 + struct list *list_item_next(struct list *item, /* ghost: */ struct list **array, int index, int n)
 {
   ...
@@ -107,7 +107,7 @@ identifier list, item;
 typedef list_t;
 @@
 
-- void list_push(list_t list, struct list *item)
+- void list_push(list_t list, void *item)
 + void list_push(list_t list, struct list *item, /* ghost: */ struct list **array, int index, int n, int item_idx)
 {
   ...
@@ -118,7 +118,7 @@ identifier list, item;
 typedef list_t;
 @@
 
-- void list_remove(list_t list, struct list *item)
+- void list_remove(list_t list, void *item)
 + void list_remove(list_t list, struct list *item, /* ghost: */ struct list **array, int index, int n, int item_idx)
 {
   ...
