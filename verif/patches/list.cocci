@@ -15,6 +15,57 @@ typedef
 + struct list **
 list_t;
 
+@list_decl@
+identifier item, dest, src, list;
+typedef list_t;
+@@
+
+(
+- void list_add(list_t list, void *item)
++ void list_add(list_t list, struct list *item, /* ghost: */ struct list **array, int index, int n, int item_idx)
+;
+|
+- void *list_chop(list_t list)
++ struct list *list_chop(list_t list, /* ghost: */ struct list **array, int index, int size)
+;
+|
+- void list_copy(list_t dest, list_t src)
++ void list_copy(list_t dest, list_t src, /* ghost: */ struct list **array, int index, int n)
+;
+|
+- void *list_head(list_t list)
++ struct list *list_head(list_t list, /* ghost: */ struct list **array, int index, int n)
+;
+|
+- void list_init(list_t list)
++ void list_init(list_t list, /* ghost: */ struct list **array)
+;
+|
+- void *list_item_next(void *item)
++ struct list *list_item_next(struct list *item, /* ghost: */ struct list **array, int index, int n)
+;
+|
+- int list_length(list_t list)
++ int list_length(list_t list, /* ghost: */ struct list **array, int index, int n)
+;
+|
+- void *list_pop(list_t list)
++ struct list *list_pop(list_t list, /* ghost: */ struct list **array, int index, int n)
+;
+|
+- void list_push(list_t list, void *item)
++ void list_push(list_t list, struct list *item, /* ghost: */ struct list **array, int index, int n, int item_idx)
+;
+|
+- void list_remove(list_t list, void *item)
++ void list_remove(list_t list, struct list *item, /* ghost: */ struct list **array, int index, int n, int item_idx)
+;
+|
+- void * list_tail(list_t list)
++ struct list * list_tail(list_t list, /* ghost: */ struct list **array, int index, int n)
+;
+)
+
 @list_add@
 identifier list, item;
 typedef list_t;
@@ -31,7 +82,7 @@ identifier list;
 typedef list_t;
 @@
 
-- struct list *list_chop(list_t list)
+- void *list_chop(list_t list)
 + struct list *list_chop(list_t list, /* ghost: */ struct list **array, int index, int size)
 {
   ...
@@ -53,7 +104,7 @@ identifier list;
 typedef list_t;
 @@
 
-- struct list *list_head(list_t list)
+- void *list_head(list_t list)
 + struct list *list_head(list_t list, /* ghost: */ struct list **array, int index, int n)
 {
   ...
@@ -74,7 +125,7 @@ typedef list_t;
 identifier item;
 @@
 
-- struct list *list_item_next(void *item)
+- void *list_item_next(void *item)
 + struct list *list_item_next(struct list *item, /* ghost: */ struct list **array, int index, int n)
 {
   ...
@@ -96,7 +147,7 @@ identifier list;
 typedef list_t;
 @@
 
-- struct list *list_pop(list_t list)
+- void *list_pop(list_t list)
 + struct list *list_pop(list_t list, /* ghost: */ struct list **array, int index, int n)
 {
   ...
@@ -129,7 +180,7 @@ identifier list;
 typedef list_t;
 @@
 
-- struct list * list_tail(list_t list)
+- void * list_tail(list_t list)
 + struct list * list_tail(list_t list, /* ghost: */ struct list **array, int index, int n)
 {
   ...
