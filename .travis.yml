@@ -41,7 +41,7 @@ install:
   - opam depext --yes --noninteractive --install frama-c why3.0.88.3 alt-ergo
   - opam pin add why3 0.88.3
   - eval $(opam config env); why3 config --detect
-  - cd ../; git clone git@github.com:evdenis/spec-utils.git; cpanm --quiet --notest --installdeps
+  - cd ../; git clone https://github.com/evdenis/spec-utils; cd spec-utils; cpanm --quiet --notest --installdeps .
 
 script:
   - ../spec-utils/bin/extricate --type contiki --config verif/contiki_extricate.conf --done verif/contiki_status.conf --kernel . --module os/lib/
