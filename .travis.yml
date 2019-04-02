@@ -1,35 +1,49 @@
-# Setup environment for Docker
-language: generic
-services: docker
+language: c
+os:
+  - linux
+dist: xenial
+addons:
+  apt:
+    packages:
+      - ocaml
+      - aspcud
+      - libgnomecanvas2-dev
+      - libgtk2.0-dev
+      - libgtksourceview2.0-dev
+      - cvc3
+      - z3
+      - coq
 
-notifications:
-  - email: false
-
-before_install:
-  # Environment setup before test script
-  - export CNG_HOST_PATH=`pwd`
-  - export DOCKER_IMG='simonduq/contiki-ng:latest'
-  - sudo chgrp -hR 1000 $CNG_HOST_PATH
-  - docker pull $DOCKER_IMG
-  - ant -q -f $CNG_HOST_PATH/tools/cooja/build.xml jar
-
-script: # The test script for each build.
-  - docker run --privileged -v $CNG_HOST_PATH:/home/user/contiki-ng -ti $DOCKER_IMG bash --login -c "make -C tests/??-$TEST_NAME";
-  # Check outcome of the test
-  - $CNG_HOST_PATH/tests/check-test.sh $CNG_HOST_PATH/tests/??-$TEST_NAME; exit $?;
+cache:
+  directories:
+    - $HOME/perl5
+    - $HOME/.opam
+    - /usr/local/bin
 
 env:
-  # Parallel builds
-  - TEST_NAME='compile-base'
-  - TEST_NAME='compile-arm-ports-01'
-  - TEST_NAME='compile-arm-ports-02'
-  - TEST_NAME='rpl-lite'
-  - TEST_NAME='rpl-classic'
-  - TEST_NAME='tun-rpl-br'
-  - TEST_NAME='coap-lwm2m'
-  - TEST_NAME='simulation-base'
-  - TEST_NAME='ieee802154'
-  - TEST_NAME='compile-nxp-ports'
-  - TEST_NAME='doxygen'
-  - TEST_NAME='compile-tools'
-  - TEST_NAME='native-runs'
+  global:
+    - WP_TIMEOUT=15
+    - WP_PROCESSES=2
+
+before_install:
+  - sudo apt-get update -qq
+  - wget http://security.ubuntu.com/ubuntu/pool/main/b/bubblewrap/bubblewrap_0.2.1-1ubuntu0.1_amd64.deb
+  - sudo dpkg -i bubblewrap_0.2.1-1ubuntu0.1_amd64.deb
+  - sudo wget --no-clobber http://cvc4.cs.stanford.edu/downloads/builds/x86_64-linux-opt/cvc4-1.6-x86_64-linux-opt -O /usr/local/bin/cvc4-1.6 || true
+  - sudo chmod +x /usr/local/bin/cvc4-1.6
+  - yes '' | sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
+  - opam init --auto-setup --compiler=4.06.1
+  - opam install --yes depext
+
+install:
+  - opam update
+  - opam upgrade --yes
+  - opam depext --yes --noninteractive --install frama-c why3.0.88.3 alt-ergo
+  - opam pin add why3 0.88.3
+  - eval $(opam config env); why3 config --detect
+  - coqc -R $(frama-c-config -print-share-path)/wp/coqwp "" verif/Lemmas.v
+  - cd ../; git clone git@github.com:evdenis/spec-utils.git; cpanm --quiet --notest --installdeps
+
+script:
+  - ../spec-utils/bin/extricate --type contiki --config verif/contiki_extricate.conf --done verif/contiki_status.conf --kernel . --module os/lib/
+  - ../spec-utils/scripts/compare_verdicts verif/verdicts.txt verif/new_verdicts.txt
