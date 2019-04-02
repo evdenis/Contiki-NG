@@ -41,7 +41,6 @@ install:
   - opam depext --yes --noninteractive --install frama-c why3.0.88.3 alt-ergo
   - opam pin add why3 0.88.3
   - eval $(opam config env); why3 config --detect
-  - coqc -R $(frama-c-config -print-share-path)/wp/coqwp "" verif/Lemmas.v
   - cd ../; git clone git@github.com:evdenis/spec-utils.git; cpanm --quiet --notest --installdeps
 
 script:
