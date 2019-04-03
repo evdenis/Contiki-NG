@@ -38,10 +38,10 @@ before_install:
   - opam install --yes depext
 
 install:
-  - opam update
-  - opam upgrade --yes
-  - opam depext --yes --noninteractive --install frama-c why3.0.88.3 alt-ergo.2.3.0
-  - opam pin add why3 0.88.3
+  - eval $(opam config env); opam update
+  - eval $(opam config env); opam upgrade --yes
+  - eval $(opam config env); opam depext --yes --noninteractive --install frama-c why3.0.88.3 alt-ergo.2.3.0
+  - eval $(opam config env); opam pin add why3 0.88.3
   - eval $(opam config env); why3 config --detect
   - cd ../; git clone https://github.com/evdenis/spec-utils; cd spec-utils; cpanm --quiet --notest --installdeps .; cd ../Contiki-NG
 
