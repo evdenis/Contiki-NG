@@ -31,8 +31,8 @@ before_install:
   - sudo apt-get update -qq
   - wget http://security.ubuntu.com/ubuntu/pool/main/b/bubblewrap/bubblewrap_0.2.1-1ubuntu0.1_amd64.deb
   - sudo dpkg -i bubblewrap_0.2.1-1ubuntu0.1_amd64.deb
-  - sudo wget --no-clobber http://cvc4.cs.stanford.edu/downloads/builds/x86_64-linux-opt/cvc4-1.6-x86_64-linux-opt -O /usr/local/bin/cvc4-1.6 || true
-  - sudo chmod +x /usr/local/bin/cvc4-1.6
+  - sudo wget --no-clobber http://cvc4.cs.stanford.edu/downloads/builds/x86_64-linux-opt/cvc4-1.6-x86_64-linux-opt -O /usr/local/bin/cvc4 || true
+  - sudo chmod +x /usr/local/bin/cvc4
   - yes '' | sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
   - opam init --auto-setup --compiler=4.06.1
   - opam install --yes depext
@@ -40,7 +40,7 @@ before_install:
 install:
   - opam update
   - opam upgrade --yes
-  - opam depext --yes --noninteractive --install frama-c why3.0.88.3 alt-ergo
+  - opam depext --yes --noninteractive --install frama-c why3.0.88.3 alt-ergo.2.3.0
   - opam pin add why3 0.88.3
   - eval $(opam config env); why3 config --detect
   - cd ../; git clone https://github.com/evdenis/spec-utils; cd spec-utils; cpanm --quiet --notest --installdeps .; cd ../Contiki-NG
