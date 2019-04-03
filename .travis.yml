@@ -43,8 +43,7 @@ install:
   - opam pin add why3 0.88.3
   - eval $(opam config env); why3 config --detect
   - cd ../; git clone https://github.com/evdenis/spec-utils; cd spec-utils; cpanm --quiet --notest --installdeps .
-  - export PATH="${PATH}:$(pwd)/spec-utils/bin:$(pwd)/spec-utils/scripts"
 
 script:
-  - eval $(opam config env); ../spec-utils/bin/extricate --type contiki --config verif/contiki_extricate.conf --done verif/contiki_status.conf --kernel . --module os/lib/
-  - ../spec-utils/scripts/compare_verdicts verif/verdicts.txt verif/new_verdicts.txt
+  - eval $(opam config env); ../spec-utils/bin/extricate --type contiki --config $(pwd)/verif/contiki_extricate.conf --done $(pwd)/verif/contiki_status.conf --kernel $(pwd) --module $(pwd)/os/lib/
+  - ../spec-utils/scripts/compare_verdicts $(pwd)/verif/verdicts.txt $(pwd)/verif/new_verdicts.txt
