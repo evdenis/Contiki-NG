@@ -46,5 +46,5 @@ install:
   - export PATH="${PATH}:$(pwd)/spec-utils/bin:$(pwd)/spec-utils/scripts"
 
 script:
-  - eval $(opam config env); extricate --type contiki --config verif/contiki_extricate.conf --done verif/contiki_status.conf --kernel . --module os/lib/
-  - compare_verdicts verif/verdicts.txt verif/new_verdicts.txt
+  - eval $(opam config env); ../spec-utils/bin/extricate --type contiki --config verif/contiki_extricate.conf --done verif/contiki_status.conf --kernel . --module os/lib/
+  - ../spec-utils/scripts/compare_verdicts verif/verdicts.txt verif/new_verdicts.txt
