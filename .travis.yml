@@ -28,13 +28,13 @@ env:
     - WP_PROCESSES=2
 
 before_install:
-  - echo $PATH
-  - false
   - sudo apt-get update -qq
   - wget http://security.ubuntu.com/ubuntu/pool/main/b/bubblewrap/bubblewrap_0.2.1-1ubuntu0.1_amd64.deb
   - sudo dpkg -i bubblewrap_0.2.1-1ubuntu0.1_amd64.deb
   - sudo wget --no-clobber http://cvc4.cs.stanford.edu/downloads/builds/x86_64-linux-opt/cvc4-1.6-x86_64-linux-opt -O /usr/local/bin/cvc4 || true
   - sudo chmod +x /usr/local/bin/cvc4
+  - cvc4 --version
+  - false
   - yes '' | sh <(curl -sL https://raw.githubusercontent.com/ocaml/opam/master/shell/install.sh)
   - opam init --auto-setup --compiler=4.06.1
   - opam install --yes depext
