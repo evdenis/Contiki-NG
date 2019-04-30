@@ -1,3 +1,6 @@
+#ifndef SPEC_LIST_H
+#define SPEC_LIST_H
+
 #ifndef MAX_SIZE
 # define MAX_SIZE (INT_MAX-1)
 #endif
@@ -9,4 +12,4 @@
 #include "lib/list_lemma_functions_index_of.h"
 #include "lib/list_lemma_functions_index_of.c"
 
-
+#endif /* SPEC_LIST_H */

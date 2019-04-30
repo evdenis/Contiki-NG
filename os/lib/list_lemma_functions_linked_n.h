@@ -1,3 +1,6 @@
+#ifndef LIST_LEMMA_FUNCTIONS_LINKED_N_H
+#define LIST_LEMMA_FUNCTIONS_LINKED_N_H
+
 /*@ requires linked_n(NULL, array, index, n, NULL);
   ensures (n == 0 );
   assigns \nothing ;
@@ -203,3 +206,5 @@ void linked_n_all_elements(struct list* root, struct list* bound,
       /@ assert linked_n{L2}(__sl_rt, __sl_arr, __sl_idx, 0, __sl_bnd); @/	\
     }										\
     /@ assert linked_n{L2}(__sl_rt, __sl_arr, __sl_idx, __sl_n, __sl_bnd); @/
+
+#endif /* LIST_LEMMA_FUNCTIONS_LINKED_N_H */

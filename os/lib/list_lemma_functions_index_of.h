@@ -1,3 +1,6 @@
+#ifndef LIST_LEMMA_FUNCTIONS_INDEX_OF_H
+#define LIST_LEMMA_FUNCTIONS_INDEX_OF_H
+
 /*@ requires down >= 0 && up >= 0;
   @ requires down<=up ==> \valid(array+(down..up-1));
   @ ensures \result == index_of(item, array, down, up);
@@ -57,3 +60,5 @@ void index_of_bounds_weak(struct list *item, struct list **array,
   @ */
 void index_of_existing_item_weak(struct list *item, struct list **array,
 				 int down, int up);
+
+#endif /* LIST_LEMMA_FUNCTIONS_INDEX_OF_H */

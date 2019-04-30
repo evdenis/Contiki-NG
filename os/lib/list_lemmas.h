@@ -1,3 +1,6 @@
+#ifndef LIST_LEMMAS_H
+#define LIST_LEMMAS_H
+
 /*@ lemma inverse:
   \forall struct list *root, **array, *bound, integer index, n ;
   linked_n(root, array, index, n, bound) ==>
@@ -180,3 +183,5 @@
       (\exists integer i ; down <= i < up && array[i] == item) ==>
         down <= index_of(item, array, down, up) < up ;
 */
+
+#endif /* LIST_LEMMAS_H */

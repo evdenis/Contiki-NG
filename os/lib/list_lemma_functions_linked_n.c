@@ -1,3 +1,5 @@
+#ifndef LIST_LEMMA_FUNCTIONS_LINKED_N_C
+#define LIST_LEMMA_FUNCTIONS_LINKED_N_C
 
 void linked_n_starting_from_null_empty(struct list **array, int index, int n)
 {
@@ -184,3 +186,5 @@ void linked_n_all_elements(struct list* root, struct list* bound,
     }
   }
 }
+
+#endif /* LIST_LEMMA_FUNCTIONS_LINKED_N_C */

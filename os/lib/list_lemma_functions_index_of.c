@@ -1,3 +1,5 @@
+#ifndef LIST_LEMMA_FUNCTIONS_INDEX_OF_C
+#define LIST_LEMMA_FUNCTIONS_INDEX_OF_C
 
 /*@ requires down >= 0 && up >= 0 && inter >= down;
   @ requires \forall int i ; down <= i < inter ==> array[i] != item;
@@ -119,3 +121,5 @@ void index_of_existing_item_weak(struct list *item, struct list **array,
     @ if (index_of(item, array, down, up) == up) 
     @ index_of_up_unexisting_item(item, array, down, up); */
 }
+
+#endif /* LIST_LEMMA_FUNCTIONS_INDEX_OF_C */

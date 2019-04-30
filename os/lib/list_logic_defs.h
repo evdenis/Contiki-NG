@@ -1,3 +1,6 @@
+#ifndef LIST_LOGIC_DEFS_H
+#define LIST_LOGIC_DEFS_H
+
 /*@
   inductive linked_n{L}(
     struct list *root, 
@@ -66,3 +69,5 @@
   predicate array_swipe_right{K, L}(struct list **array, integer down, integer up) =
     \forall integer i; down <= i < up  ==> \at(array[i], L) == \at(array[i-1], K);
 */
+
+#endif /* LIST_LOGIC_DEFS_H */
