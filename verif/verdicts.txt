@@ -1,13 +1,12 @@
-VERDICT: linked_n_merge_segment INSTRUMENT FAIL
-VERDICT: linked_n_merge_segment_right INSTRUMENT FAIL
-VERDICT: linked_n_split_segment INSTRUMENT FAIL
-VERDICT: linked_n_split_segment_direct INSTRUMENT FAIL
-VERDICT: linked_n_split_segment_right INSTRUMENT FAIL
-VERDICT: linked_n_split_segment_right_direct INSTRUMENT FAIL
 VERDICT: list_add INSTRUMENT FAIL
 VERDICT: list_length INSTRUMENT FAIL
 VERDICT: list_push INSTRUMENT FAIL
 VERDICT: linked_n_first_valid UNPROVED
+VERDICT: linked_n_merge_segment PARTIALLY PROVED (33/40)
+VERDICT: linked_n_split_segment PARTIALLY PROVED (46/53)
+VERDICT: linked_n_split_segment_direct PARTIALLY PROVED (14/15)
+VERDICT: linked_n_split_segment_right PARTIALLY PROVED (8/9)
+VERDICT: linked_n_split_segment_right_direct PARTIALLY PROVED (11/13)
 VERDICT: bitrev PARTIALLY PROVED (15/27)
 VERDICT: ifft PARTIALLY PROVED (259/270)
 VERDICT: ilog2 PARTIALLY PROVED (28/40)
@@ -32,6 +31,7 @@ VERDICT: ringbuf_elements PARTIALLY PROVED (8/9)
 VERDICT: ringbuf_get PARTIALLY PROVED (17/18)
 VERDICT: ringbuf_put PARTIALLY PROVED (18/19)
 VERDICT: ringbufindex_elements PARTIALLY PROVED (8/9)
+VERDICT: linked_n_merge_segment_right PROVED
 VERDICT: aead PROVED
 VERDICT: aes_128_set_padded_key PROVED
 VERDICT: cosI PROVED
