@@ -29,10 +29,6 @@ typedef list_t;
 + struct list *list_chop(list_t list, /* ghost: */ struct list **array, int index, int size)
 ;
 |
-- void list_copy(list_t dest, list_t src)
-+ void list_copy(list_t dest, list_t src, /* ghost: */ struct list **array, int index, int n)
-;
-|
 - void *list_head(list_t list)
 + struct list *list_head(list_t list, /* ghost: */ struct list **array, int index, int n)
 ;
@@ -65,6 +61,15 @@ typedef list_t;
 + struct list * list_tail(list_t list, /* ghost: */ struct list **array, int index, int n)
 ;
 )
+
+@list_copy_decl@
+identifier dest, src;
+typedef list_t;
+@@
+
+- void list_copy(list_t dest, list_t src)
++ void list_copy(list_t dest, list_t src, /* ghost: */ struct list **array, int index, int n)
+;
 
 @list_add@
 identifier list, item;
