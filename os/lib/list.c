@@ -99,7 +99,13 @@ list_head(list_t list)
 void
 list_copy(list_t dest, list_t src)
 {
+  /*@ assert SepDest: 
+    \let ll = to_logic_list{Pre}(*src, NULL) ;
+    \forall integer i ; 0 <= i < \length(ll) ==> \separated(\nth(ll, i), dest) ;
+  */
   *dest = *src;
+  //@ assert unchanged{Pre,Here}(to_logic_list{Pre}(*src, NULL)) ;
+  //@ assert linked_ll(*src, NULL, to_logic_list(*src, NULL));
 }
 /*---------------------------------------------------------------------------*/
 /**

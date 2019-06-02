@@ -228,6 +228,25 @@ void   list_remove(list_t list, void *item);
   @ ensures \result == \length(to_logic_list(*list, NULL));
   @*/
 int    list_length(list_t list);
+/*@ requires ValidHandler: \valid(src);
+  @ requires HandlerSep: dptr_separated_from_list(src, to_logic_list(*src, NULL));
+  @ requires Linked: linked_ll(*src, NULL, to_logic_list(*src, NULL));
+  @ requires LengthMax: \length(to_logic_list(*src, NULL)) < INT_MAX ;
+  @
+  @ requires \valid(dest) ;
+  @ requires dptr_separated_from_list(dest, to_logic_list(*src, NULL));
+  @
+  @ assigns *dest ;
+  @ 
+  @ ensures HandlerSep1:  dptr_separated_from_list(src, to_logic_list(*src, NULL));
+  @ ensures HandlerSep2:  dptr_separated_from_list(dest, to_logic_list(*src, NULL));
+  @ ensures LengthMax:    \length(to_logic_list(*src, NULL)) < INT_MAX ;
+  @ ensures ValidHandler: \valid(src) && \valid(dest);
+  @ ensures Linked:        linked_ll(*src, NULL, to_logic_list(*src, NULL));
+  @ ensures unchanged{Pre,Here}(to_logic_list{Pre}(*src, NULL));
+  @ ensures linked_ll(*dest, NULL, to_logic_list(*dest, NULL));
+  @ ensures to_logic_list(*dest, NULL) == to_logic_list{Pre}(*src, NULL) ;
+  @*/
 void   list_copy(list_t dest, list_t src);
 void   list_insert(list_t list, void *previtem, void *newitem);
 void * list_item_next(void *item);
