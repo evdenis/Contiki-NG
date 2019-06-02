@@ -197,6 +197,34 @@ void * list_head(list_t list);
   @ disjoint behaviors;
   @*/
 void * list_tail(list_t list);
+/*@ requires ValidHandler: \valid(list);
+  @ requires HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ requires Linked:        linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ requires LengthMax:    \length(to_logic_list(*list, NULL)) < INT_MAX ;
+  @ 
+  @ assigns *list ;
+  @
+  @ ensures HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ ensures ValidHandler: \valid(list);
+  @ ensures Linked:        linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ ensures RemovedHead:  ptr_separated_from_list(\old(*list), to_logic_list(*list, NULL));
+  @ 
+  @ behavior empty:
+  @   assumes *list  == NULL ;
+  @   ensures \result == NULL ;
+  @   
+  @ behavior not_empty:
+  @   assumes *list != NULL ;
+  @   ensures \result == \old(*list) ;
+  @   ensures *list == \old((*list)->next) ;
+  @   ensures to_logic_list{Pre}(\at(*list, Pre), NULL) ==
+  @           ([| \at(*list, Pre) |] ^ to_logic_list(*list, NULL));
+  @   ensures \length(to_logic_list(*list, NULL)) ==
+  @           \length(to_logic_list{Pre}(\at(*list,Pre), NULL)) - 1 ;
+  @           
+  @ complete behaviors;
+  @ disjoint behaviors;
+  @*/
 void * list_pop (list_t list);
 void   list_push(list_t list, void *item);
 void * list_chop(list_t list);

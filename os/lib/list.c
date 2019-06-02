@@ -354,7 +354,9 @@ list_pop(list_t list)
   struct list *l;
   l = *list;
   if(*list != NULL) {
+    //@ ghost struct list* next = (*list)->next ;
     *list = ((struct list *)*list)->next;
+    //@ assert unchanged{Pre, Here}(to_logic_list{Pre}(next, NULL));
   }
 
   return l;
