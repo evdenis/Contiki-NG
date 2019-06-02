@@ -150,6 +150,29 @@ typedef void ** list_t;
   @*/
 void   list_init(list_t list);
 void * list_head(list_t list);
+/*@ requires ValidHandler: \valid(list);
+  @ requires HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ requires Linked:        linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ requires LengthMax:    \length(to_logic_list(*list, NULL)) < INT_MAX ;
+  @ 
+  @ assigns \nothing ;
+  @
+  @ ensures HandlerSep:    dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ ensures ValidHandler:  \valid(list);
+  @ ensures Linked:         linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ ensures LengthMax:     \length(to_logic_list(*list, NULL)) < INT_MAX ;
+  @
+  @ behavior empty:
+  @   assumes *list == NULL;
+  @   ensures \result == NULL;
+  @
+  @ behavior not_empty:
+  @   assumes *list != NULL;
+  @   ensures \let ll = to_logic_list(*list, NULL) ; \result == \nth(ll, \length(ll)-1);
+  @
+  @ complete behaviors;
+  @ disjoint behaviors;
+  @*/
 void * list_tail(list_t list);
 void * list_pop (list_t list);
 void   list_push(list_t list, void *item);

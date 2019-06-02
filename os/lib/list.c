@@ -122,6 +122,15 @@ list_tail(list_t list)
     return NULL;
   }
 
+  /*@ loop invariant \nth(to_logic_list(*list, NULL), n) == l && l != NULL;
+    @ loop invariant linked_ll(l, NULL, to_logic_list(l, NULL));
+    @ loop invariant linked_ll(*list, NULL, to_logic_list(*list, NULL));
+    @ loop invariant n == \length(to_logic_list(*list, NULL)) - 
+    @                     \length(to_logic_list(l, NULL));
+    @ loop invariant 0 <= n <= \length(to_logic_list(*list, NULL))-1 ;
+    @ loop assigns l, n ;
+    @ loop variant \length(to_logic_list(l->next, NULL)); 
+    @*/
   for(l = *list; l->next != NULL; l = l->next);
 
   return l;
