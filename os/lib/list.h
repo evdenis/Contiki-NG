@@ -272,6 +272,24 @@ int    list_length(list_t list);
   @*/
 void   list_copy(list_t dest, list_t src);
 void   list_insert(list_t list, void *previtem, void *newitem);
+/*@ requires linked_ll(item, NULL, to_logic_list(item, NULL));
+  @ 
+  @ assigns \nothing ;
+  @
+  @ behavior empty:
+  @   assumes item == NULL ;
+  @   ensures \result == NULL ;
+  @   
+  @ behavior not_empty:
+  @   assumes item != NULL ;
+  @   ensures \result == item->next ;
+  @   ensures linked_ll(item->next, NULL, to_logic_list(item->next, NULL));
+  @   ensures to_logic_list(item, NULL) ==
+  @           ([| item |] ^ to_logic_list(item->next, NULL)) ;
+  @           
+  @ complete behaviors;
+  @ disjoint behaviors;
+  @*/
 void * list_item_next(void *item);
 
 #endif /* LIST_H_ */
