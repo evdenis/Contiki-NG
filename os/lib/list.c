@@ -351,11 +351,37 @@ list_chop(list_t list)
     return l;
   }
 
+  /*@ loop invariant \nth(to_logic_list(*list, NULL), n) == l && l != NULL;
+    @ loop invariant \nth(to_logic_list(*list, NULL), n+1) == l->next && l->next != NULL;
+    @ loop invariant linked_ll(*list, NULL, to_logic_list(*list, NULL));
+    @ loop invariant linked_ll(*list, l, to_logic_list(*list, l));
+    @ loop invariant linked_ll(l, NULL, to_logic_list(l, NULL));
+    @ loop invariant n == \length(to_logic_list(*list, l));
+    @ loop invariant 0 <= n <= \length(to_logic_list(*list, NULL)) - 2;
+    @ loop invariant unchanged{Pre, Here}(to_logic_list(*list, NULL)) ;
+    @ loop invariant dptr_separated_from_list(list, to_logic_list(*list, NULL));
+    @ loop assigns l, n ;
+    @ loop variant \length(to_logic_list(l->next, NULL)); 
+    @*/
   for(l = *list; l->next->next != NULL; l = l->next);
 
+  //@ assert in_list(l, to_logic_list(*list, NULL)) ;
+  /*@ assert 
+      linked_ll(*list, NULL, to_logic_list(*list, NULL)) ==>
+        linked_ll(*list, l, to_logic_list(*list, l)) &&
+	linked_ll(l, NULL, to_logic_list(l, NULL)) ;
+  */
+  //@ ghost PreM: ;
+  //@ assert ptr_separated_from_list(l, to_logic_list(*list, l)) ;
+  //@ assert to_logic_list(*list, l->next) == (to_logic_list(*list, l) ^ [| l |]) ;
   r = l->next;
   l->next = NULL;
-
+  //@ assert unchanged{PreM,Here}(to_logic_list{PreM}(*list, l)) ;
+  //@ assert to_logic_list(*list, l->next) == (to_logic_list(*list, l) ^ [| l |]) ;
+  
+  //@ assert linked_ll(*list, l, to_logic_list(*list, l)) ;
+  //@ assert linked_ll(*list, l->next, to_logic_list(*list, l->next)) ;
+  
   return r;
 }
 /*---------------------------------------------------------------------------*/

@@ -265,6 +265,51 @@ void * list_pop (list_t list);
   @ disjoint behaviors;
 */
 void   list_push(list_t list, void *item);
+/*@ requires ValidHandler: \valid(list);
+  @ requires HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ requires Linked:        linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ requires LengthMax:    \length(to_logic_list(*list, NULL)) < INT_MAX ;
+  @
+  @ ensures HandlerSep:    dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ ensures ValidHandler:  \valid(list);
+  @ ensures Linked:         linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @
+  @ assigns *list,
+  @         { l->next 
+  @           | struct list* l ; 
+  @             in_list(l, to_logic_list{Pre}(\at(*list, Pre), NULL)) && 
+  @             \at(l->next, Pre) != NULL && \at(l->next->next, Pre) == NULL } ;
+  @
+  @ behavior empty:
+  @   assumes *list == NULL ;
+  @   assigns \nothing ;
+  @   ensures *list == \old(*list);
+  @   ensures RemainsNull: *list == NULL ;
+  @   ensures Nothing: \result == NULL ;
+  @
+  @ behavior single_element:
+  @   assumes *list != NULL ;
+  @   assumes (*list)->next == NULL ;
+  @   assigns *list ;
+  @   ensures NowNull: *list == NULL ;
+  @   ensures Head: \result == \old(*list) ;
+  @
+  @ behavior more_elements:
+  @   assumes *list != NULL && (*list)->next != NULL ;
+  @   assigns 
+  @     \nth(to_logic_list{Pre}(*list, NULL), \length(to_logic_list{Pre}(*list, NULL)) - 2)->next;
+  @   ensures *list == \old(*list);
+  @   ensures NewList:
+  @     \let pre_ll = to_logic_list{Pre}(*list, NULL) ;
+  @     to_logic_list(*list, NULL) ==
+  @     to_logic_list{Pre}(\at(*list, Pre), \nth(pre_ll, \length(pre_ll)-1)) ;
+  @   ensures Tail:
+  @     \let pre_ll = to_logic_list{Pre}(*list, NULL) ;
+  @     \result == \nth(pre_ll, \length(pre_ll) - 1) ;
+  @
+  @ complete behaviors ;
+  @ disjoint behaviors ;
+*/
 void * list_chop(list_t list);
 /*@ requires ValidHandler: \valid(list);
   @ requires HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));

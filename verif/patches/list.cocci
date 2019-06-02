@@ -40,6 +40,10 @@ typedef list_t;
 - void * list_tail(list_t list)
 + struct list * list_tail(list_t list)
 ;
+|
+- void *list_chop(list_t list)
++ struct list *list_chop(list_t list)
+;
 )
 
 @list_add@
@@ -103,4 +107,42 @@ typedef list_t;
 + }
   ...
 }
+
+@list_chop@
+identifier list, l;
+typedef list_t;
+@@
+
+- void *list_chop(list_t list)
++ struct list *list_chop(list_t list)
+{
++  int n;
+  ...
+  if(((struct list *)*list)->next == NULL) {
+    ...
+  }
++  l = *list;
+  ...
+-  for(l = *list; l->next->next != NULL; l = l->next);
++  while(l->next->next != NULL){
++    //@ assert in_list(l->next, to_logic_list(*list, NULL)) ;
++    //@ assert all_separated_in_list(to_logic_list(*list, NULL)) ;
++    //@ assert in_list(l, to_logic_list(*list, NULL)) ;
++    //@ assert to_logic_list(*list, NULL) == (to_logic_list(*list, l) ^ to_logic_list(l, NULL)) ;
++    /*@ assert \forall integer i ; 0 <= i < \length(to_logic_list(*list, l)) ==>
++        \separated(\nth(to_logic_list(*list, NULL), i),
++	           \nth(to_logic_list(*list, NULL), \length(to_logic_list(*list, l))+1)) ;
++    */
++    //@ assert \nth(to_logic_list(*list, NULL), \length(to_logic_list(*list, l))+1) == l->next ;
++    /*@ assert \forall integer i ; 0 <= i < \length(to_logic_list(*list, l)) ==>
++        \nth(to_logic_list(*list, NULL), i) == \nth(to_logic_list(*list, l), i) ;
++    */
++    //@ assert ptr_separated_from_list(l->next, to_logic_list(*list, l)) ;
++    //@ assert to_logic_list(*list, l->next) == (to_logic_list(*list, l) ^ [| l |]) ;  
++    l = l->next ;
++    ++n ;
++  }
+  ...
+}
+
 
