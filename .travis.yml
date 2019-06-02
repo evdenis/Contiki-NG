@@ -12,7 +12,6 @@ addons:
       - libgtksourceview2.0-dev
       - cvc3
       - z3
-      - coccinelle
 
 cache:
   directories:
@@ -37,9 +36,10 @@ before_install:
 install:
   - opam update
   - opam upgrade --yes
-  - opam depext --yes --noninteractive --install frama-c why3.0.88.3 alt-ergo
+  - opam depext --yes --noninteractive --install frama-c why3.0.88.3 alt-ergo menhir
   - opam pin add why3 0.88.3
   - eval $(opam config env); why3 config --detect
+  - cd ../; wget http://coccinelle.lip6.fr/distrib/coccinelle-1.0.7.tar.gz; tar xf coccinelle-1.0.7.tar.gz; cd coccinelle-1.0.7; autoconf && ./configure --prefix=/usr/local/ && make && sudo make install; cd ../Contiki-NG
   - cd ../; git clone https://github.com/evdenis/spec-utils; cd spec-utils; cpanm --quiet --notest --installdeps .; cd ../Contiki-NG
 
 script:
