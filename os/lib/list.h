@@ -195,6 +195,15 @@ void * list_chop(list_t list);
 */
 void   list_add(list_t list, void *item);
 void   list_remove(list_t list, void *item);
+/*@ requires ValidHandler: \valid(list);
+  @ requires HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ requires Linked:        linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ requires LengthMax:    \length(to_logic_list(*list, NULL)) < INT_MAX ;
+  @ 
+  @ assigns \nothing ;
+  @
+  @ ensures \result == \length(to_logic_list(*list, NULL));
+  @*/
 int    list_length(list_t list);
 void   list_copy(list_t dest, list_t src);
 void   list_insert(list_t list, void *previtem, void *newitem);

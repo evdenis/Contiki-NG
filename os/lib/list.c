@@ -396,6 +396,13 @@ list_length(list_t list)
   struct list *l;
   int n = 0;
 
+  /*@ loop invariant linked_ll(l, NULL, to_logic_list(l, NULL));
+    @ loop invariant linked_ll(*list, NULL, to_logic_list(*list, NULL));
+    @ loop invariant n == \length(to_logic_list(*list, NULL)) - 
+    @                     \length(to_logic_list(l, NULL));
+    @ loop assigns l, n ;
+    @ loop variant \length(to_logic_list(l, NULL)); 
+    @*/
   for(l = *list; l != NULL; l = l->next) {
     ++n;
   }
