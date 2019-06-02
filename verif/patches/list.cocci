@@ -16,7 +16,7 @@ typedef
 list_t;
 
 @list_decl@
-identifier item, dest, src, list;
+identifier previtem, newitem, item, list;
 typedef list_t;
 @@
 
@@ -43,6 +43,10 @@ typedef list_t;
 |
 - void *list_chop(list_t list)
 + struct list *list_chop(list_t list)
+;
+|
+- void list_insert(list_t list, void *previtem, void *newitem)
++ void list_insert(list_t list, struct list *previtem, struct list *newitem)
 ;
 )
 
@@ -90,7 +94,7 @@ typedef list_t;
 }
 
 @list_tail@
-identifier list;
+identifier list, l;
 typedef list_t;
 @@
 
@@ -145,4 +149,12 @@ typedef list_t;
   ...
 }
 
-
+@list_insert@
+identifier list, previtem, newitem;
+typedef list_t;
+@@
+- void list_insert(list_t list, void *previtem, void *newitem)
++ void list_insert(list_t list, struct list *previtem, struct list *newitem)
+{
+  ...
+}

@@ -126,8 +126,12 @@
        list_init((struct_ptr)->name);                                   \
     } while(0)
 
-#include "list_logic_defs.spec"
-#include "list_lemmas.spec"
+#ifdef SPECIFICATION
+# include "list_logic_defs.spec"
+# include "list_lemmas.spec"
+# include "list_split.c"
+# include "list_force_insert.c"
+#endif
 
 /**
  * The linked list type.
@@ -429,6 +433,89 @@ int    list_length(list_t list);
   @ ensures to_logic_list(*dest, NULL) == to_logic_list{Pre}(*src, NULL) ;
   @*/
 void   list_copy(list_t dest, list_t src);
+/*@ requires ValidHandler: \valid(list);
+  @ requires HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ requires Linked:        linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ requires LengthMax:    \length(to_logic_list(*list, NULL)) < INT_MAX ;
+  @ requires \valid(newitem) ;
+  @ requires previtem == NULL || in_list(previtem, to_logic_list(*list, NULL)) ;
+  @ requires in_list(newitem, to_logic_list(*list, NULL)) ||
+  @          ptr_separated_from_list(newitem, to_logic_list(*list, NULL)) ;
+  @ requires \separated(list, previtem, newitem) ;
+  @
+  @ ensures HandlerSep:    dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ ensures ValidHandler:  \valid(list);
+  @ ensures Linked:         linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @
+  @ assigns *list,
+  @         newitem->next,
+  @         previtem->next,
+  @         { l->next | struct list* l ; in_list(l, to_logic_list{Pre}(*list, NULL)) } ;
+  @
+  @ behavior at_beginning_and_does_not_contain:
+  @   assumes previtem == NULL ;
+  @   assumes !in_list(newitem, to_logic_list{Pre}(*list, NULL));
+  @   ensures AddedBegin: to_logic_list(*list, NULL) ==
+  @                     ([| newitem |] ^ to_logic_list{Pre}(\old(*list), NULL)) ;
+  @   ensures SizeInc: \length(to_logic_list(*list, NULL)) == 
+  @                    \length(to_logic_list{Pre}(\at(*list,Pre), NULL)) + 1 ;
+  @
+  @ behavior at_beginning_and_contains:
+  @   assumes previtem == NULL ;
+  @   assumes in_list(newitem, to_logic_list{Pre}(*list, NULL));
+  @   ensures NewList: to_logic_list(*list, NULL) ==
+  @     ([| newitem |] ^ to_logic_list{Pre}(\old(*list), newitem) ^ 
+  @      to_logic_list{Pre}(\at(newitem->next,Pre), NULL)) ;
+  @   ensures SameSize: \length(to_logic_list(*list, NULL)) == 
+  @                     \length(to_logic_list{Pre}(\at(*list,Pre), NULL)) ;
+  @
+  @ behavior somewhere_else_does_not_contain:
+  @   assumes previtem != NULL ;
+  @   assumes !in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL));
+  @   ensures NewList: to_logic_list(*list, NULL) == (
+  @     to_logic_list{Pre}(\old(*list), \old(previtem->next)) ^
+  @     [| newitem |] ^
+  @     to_logic_list{Pre}(\old(previtem->next), NULL));
+  @   ensures SizeInc: \length(to_logic_list(*list, NULL)) == 
+  @                    \length(to_logic_list{Pre}(\at(*list,Pre), NULL)) + 1 ;
+  @
+  @ behavior somewhere_else_contains_after_prev_linked:
+  @   assumes previtem != NULL ;
+  @   assumes in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL));
+  @   assumes in_list(previtem, to_logic_list{Pre}(\at(*list, Pre), newitem)) ;
+  @   assumes \at(previtem->next, Pre) == newitem ;
+  @   ensures NewList: to_logic_list(*list, NULL) == to_logic_list{Pre}(\at(*list, Pre), NULL) ;
+  @   ensures SameSize: \length(to_logic_list(*list, NULL)) == 
+  @                     \length(to_logic_list{Pre}(\at(*list,Pre), NULL)) ;
+  @
+  @ behavior somewhere_else_contains_after_prev_not_linked:
+  @   assumes previtem != NULL ;
+  @   assumes in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL));
+  @   assumes in_list(previtem, to_logic_list{Pre}(\at(*list, Pre), newitem)) ;
+  @   assumes \at(previtem->next, Pre) != newitem ;
+  @   ensures NewList: to_logic_list(*list, NULL) == 
+  @     (to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, Pre)) ^ 
+  @     [| newitem |] ^
+  @     to_logic_list{Pre}(\at(previtem->next, Pre), newitem) ^
+  @     to_logic_list{Pre}(\at(newitem->next, Pre), NULL)) ;
+  @   ensures SameSize: \length(to_logic_list(*list, NULL)) == 
+  @                     \length(to_logic_list{Pre}(\at(*list,Pre), NULL)) ;
+  @
+  @ behavior somewhere_else_contains_before:
+  @   assumes previtem != NULL ;
+  @   assumes in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL));
+  @   assumes in_list(previtem, to_logic_list{Pre}(newitem, NULL));
+  @   ensures NewList: to_logic_list(*list, NULL) == 
+  @     (to_logic_list{Pre}(\at(*list, Pre), newitem) ^ 
+  @     to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, Pre)) ^
+  @     [| newitem |] ^
+  @     to_logic_list{Pre}(\at(previtem->next, Pre), NULL)) ;
+  @   ensures SameSize: \length(to_logic_list(*list, NULL)) == 
+  @                     \length(to_logic_list{Pre}(\at(*list,Pre), NULL)) ;
+  @
+  @ complete behaviors;
+  @ disjoint behaviors;
+*/
 void   list_insert(list_t list, void *previtem, void *newitem);
 /*@ requires linked_ll(item, NULL, to_logic_list(item, NULL));
   @ 

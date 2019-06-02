@@ -795,9 +795,370 @@ list_insert(list_t list, void *previtem, void *newitem)
   if(previtem == NULL) {
     list_push(list, newitem);
   } else {
-    list_remove(list, newitem);
-    ((struct list *)newitem)->next = ((struct list *)previtem)->next;
-    ((struct list *)previtem)->next = newitem;
+    //@ ghost list_split(list, newitem, NULL) ;
+
+    /*@ assigns \nothing ;
+      ensures in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+        in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	in_list(previtem->next, to_logic_list{Pre}(newitem->next, NULL)) || previtem->next == NULL ;
+      ensures in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+        in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(newitem->next, NULL)) ;
+      ensures in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+        in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==> 
+	previtem->next != newitem ;
+      ensures in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+        in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+        linked_ll{Pre}(newitem->next, NULL, to_logic_list{Pre}(newitem->next, NULL)) ;
+    */ {
+      /*@ assert in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	  linked_ll{Pre}(newitem->next, NULL, to_logic_list{Pre}(newitem->next, NULL)) &&
+	  ptr_separated_from_list(newitem, to_logic_list{Pre}(newitem->next, NULL)) ;
+      */
+      /*@ assert in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	to_logic_list{Pre}(newitem, NULL) == 
+	([| newitem |] ^ to_logic_list{Pre}(newitem->next, NULL)) ;
+      */
+      /*@ assert in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	!in_list(previtem, [| newitem |]) ;
+      */
+      /*@ assert in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(newitem->next, NULL)) ;
+      */
+      /*@ assert in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(newitem->next, NULL)) ==>
+	in_list(previtem->next, to_logic_list{Pre}(newitem->next, NULL)) || previtem->next == NULL ;
+      */
+    }
+    
+    if(previtem->next != newitem){
+      //@ ghost list_split(list, previtem->next, NULL) ;
+
+      /*@ assigns \nothing ;
+	ensures in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(*list, newitem)) ==>
+	to_logic_list{Pre}(*list, newitem) ==
+	(to_logic_list{Pre}(*list, previtem->next) ^ to_logic_list{Pre}(previtem->next, newitem)) ;
+      */ {
+	/*@ assert in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(*list, newitem)) ==>
+	  in_list(previtem->next, to_logic_list{Pre}(*list, newitem)) ;
+	*/
+      }
+
+      /*@ assigns \nothing ;
+	ensures in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	to_logic_list{Pre}(newitem->next, NULL) ==
+	(to_logic_list{Pre}(newitem->next, previtem->next) ^ to_logic_list{Pre}(previtem->next, NULL)) ;
+      */ {
+	/*@ assert in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	  linked_ll{Pre}(newitem->next, NULL, to_logic_list{Pre}(newitem->next, NULL)) ;
+	*/
+	/*@ assert in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	  to_logic_list{Pre}(newitem, NULL) == 
+	           ([| newitem |] ^ to_logic_list{Pre}(newitem->next, NULL)) ;
+	*/
+	/*@ assert in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	  !in_list(previtem, [| newitem |]) ;
+	*/
+	/*@ assert in_list(newitem, to_logic_list{Pre}(*list, NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem->next, NULL)) ;
+	*/
+      }
+      
+      list_remove(list, newitem);
+
+      //@ ghost AR: ; 
+      
+      //@ assert \at(previtem->next, AR) == \at(previtem->next, Pre) ;
+      //@ assert \at(newitem->next, AR) == \at(newitem->next, Pre) ;
+
+      /*@ assigns \nothing ;
+	ensures in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(\at(*list, Pre), newitem)) ==>
+	to_logic_list{AR}(\at(*list, AR), \at(previtem->next, AR)) == 
+	to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, Pre)) ;
+      */ {
+	/*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(\at(*list, Pre), newitem)) ==>
+	  (to_logic_list{AR}(\at(*list, AR), \at(previtem->next, AR)) ^
+	   to_logic_list{AR}(\at(previtem->next, AR), NULL))
+	   ==
+	  (to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, AR)) ^ 
+	   to_logic_list{Pre}(\at(previtem->next, AR), newitem) ^
+	   to_logic_list{Pre}(\at(newitem->next, Pre), NULL)) ;
+	*/
+	/*@ assigns \nothing ;
+	    ensures in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    in_list(\at(previtem->next, Pre), to_logic_list{Pre}(\at(*list, Pre), newitem)) ==>
+	      unchanged{Pre, AR}(to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, Pre))) ;
+	*/ {
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    \let ll = to_logic_list{Pre}(\at(*list, Pre), newitem) ;
+	    \forall integer i ; 0 <= i < \length(ll)-1 ==> 
+	    (\valid{Pre}(\at(\nth(ll, i), Pre)) && \valid{AR}(\at(\nth(ll, i), AR)) &&
+	     \at(\nth(ll, i)->next, Pre) == \at(\nth(ll, i)->next, AR)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    \let ll = to_logic_list{Pre}(\at(*list, Pre), newitem) ;
+	    in_list(\at(previtem->next, Pre), ll) ==>
+	    to_logic_list{Pre}(\at(*list, Pre), newitem) ==
+	    (to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, Pre)) ^ 
+	     to_logic_list{Pre}(\at(previtem->next, Pre), newitem)) &&
+	    linked_ll{Pre}(\at(*list, Pre), \at(previtem->next, Pre), 
+	                to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, Pre))) &&
+            linked_ll{Pre}(\at(previtem->next, Pre), newitem, 
+	                to_logic_list{Pre}(\at(previtem->next, Pre), newitem)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    \let ll = to_logic_list{Pre}(\at(*list, Pre), newitem) ;
+	    in_list(\at(previtem->next, Pre), ll) ==>
+	    \let sll = to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, Pre)) ;
+	    \forall integer i ; 0 <= i < \length(sll) ==>
+	    (\valid{Pre}(\at(\nth(ll, i), Pre)) && \valid{Pre}(\at(\nth(sll, i), Pre)) &&
+	      \at(\nth(sll, i)->next, Pre) == \at(\nth(ll, i)->next, Pre)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    \let ll = to_logic_list{Pre}(\at(*list, Pre), newitem) ;
+	    in_list(\at(previtem->next, Pre), ll) ==>
+	    \let sll = to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, Pre)) ;
+	      \length(sll) <= \length(ll)-1 ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    \let ll = to_logic_list{Pre}(\at(*list, Pre), newitem) ;
+	    in_list(\at(previtem->next, Pre), ll) ==>
+	    \let sll = to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, Pre)) ;
+	    \forall integer i ; 0 <= i < \length(sll) ==>
+	      (\valid{Pre}(\at(\nth(sll, i), Pre)) && \valid{AR}(\at(\nth(sll, i), AR)) &&
+	      \at(\nth(sll, i)->next, Pre) == \at(\nth(sll, i)->next, AR)) ;	      
+	  */
+	}
+	/*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(\at(*list, Pre), newitem)) ==>
+	  linked_ll{Pre}(\at(*list, Pre), \at(previtem->next, Pre), 
+	              to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, Pre))) ;
+	*/
+      }
+
+      /*@ assigns \nothing ;
+	ensures in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	to_logic_list{AR}(\at(previtem->next, AR), NULL) == 
+	to_logic_list{Pre}(\at(previtem->next, Pre), NULL) ;
+      */ {
+	/*@ assigns \nothing ;
+	  ensures in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	  (to_logic_list{AR}(\at(*list, AR), \at(previtem->next, AR)) ^
+	   to_logic_list{AR}(\at(previtem->next, AR), NULL))
+	   ==
+	  (to_logic_list{Pre}(\at(*list, Pre), newitem) ^
+	   to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, AR)) ^
+	   to_logic_list{Pre}(\at(previtem->next, AR), NULL)) ;
+	*/ {
+	  /*@ assert in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	    in_list(\at(previtem->next, AR), to_logic_list{AR}(\at(*list, AR), NULL)) || 
+	    \at(previtem->next, AR) == NULL ;
+	  */
+	  /*@ assert in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	    linked_ll(\at(*list, AR), NULL, to_logic_list{AR}(\at(*list, AR), NULL)) ;
+	  */
+	  /*@ assert in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	    to_logic_list{AR}(\at(*list, AR), NULL) ==
+	    (to_logic_list{AR}(\at(*list, AR), \at(previtem->next, AR)) ^
+	    to_logic_list{AR}(\at(previtem->next, AR), NULL)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    to_logic_list{AR}(\at(*list, AR), NULL) ==
+	    (to_logic_list{Pre}(\at(*list, Pre), newitem) ^
+	    to_logic_list{Pre}(\at(newitem->next, Pre), NULL)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    in_list(\at(previtem->next, Pre), to_logic_list{Pre}(\at(newitem->next, Pre), NULL)) ==>
+	    to_logic_list{Pre}(\at(newitem->next, Pre), NULL) ==
+	    (to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, Pre)) ^
+	    to_logic_list{Pre}(\at(previtem->next, Pre), NULL)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    \at(previtem->next, Pre) == NULL ==>
+	    to_logic_list{Pre}(\at(newitem->next, Pre), NULL) ==
+	    (to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, Pre)) ^
+	    to_logic_list{Pre}(\at(previtem->next, Pre), NULL)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	    in_list(\at(previtem->next, Pre), to_logic_list{Pre}(\at(newitem->next, Pre), NULL)) || 
+	    \at(previtem->next, Pre) == NULL ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	    to_logic_list{Pre}(\at(newitem->next, Pre), NULL) ==
+	    (to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, Pre)) ^
+	    to_logic_list{Pre}(\at(previtem->next, Pre), NULL)) ;
+	  */
+	}
+
+	/*@ assigns \nothing ;
+	    ensures in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    in_list(\at(previtem->next, Pre), to_logic_list{Pre}(newitem->next, NULL)) ==>
+	      unchanged{Pre, AR}(to_logic_list{Pre}(\at(previtem->next, Pre), NULL)) ;
+	*/ {
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    \let ll = to_logic_list{Pre}(\at(newitem->next, Pre), NULL) ;
+	    \forall integer i ; 0 <= i < \length(ll) ==> 
+	    (\valid{Pre}(\at(\nth(ll, i), Pre)) && \valid{AR}(\at(\nth(ll, i), AR)) &&
+	     \at(\nth(ll, i)->next, Pre) == \at(\nth(ll, i)->next, AR)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    linked_ll{Pre}(\at(newitem->next, Pre), NULL, to_logic_list(\at(newitem->next, Pre), NULL)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    in_list(\at(previtem->next, Pre), to_logic_list{Pre}(newitem->next, NULL)) ==>
+	    to_logic_list{Pre}(\at(newitem->next, Pre), NULL) ==
+	    (to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, Pre)) ^ 
+	     to_logic_list{Pre}(\at(previtem->next, Pre), NULL)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    \let ll = to_logic_list{Pre}(\at(newitem->next, Pre), NULL) ;
+	    in_list(\at(previtem->next, Pre), ll) ==>
+	    \let sll = to_logic_list{Pre}(\at(previtem->next, Pre), NULL) ;
+	    \let left = to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, Pre)) ;
+	    \forall integer i ; 0 <= i < \length(sll) ==>
+	    \let off_i = i + \length(left) ;
+	    (\valid{Pre}(\at(\nth(ll, off_i), Pre)) && \valid{Pre}(\at(\nth(sll, i), Pre)) &&
+	      \at(\nth(sll, i)->next, Pre) == \at(\nth(ll, off_i)->next, Pre)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    \let ll = to_logic_list{Pre}(\at(newitem->next, Pre), NULL) ;
+	    in_list(\at(previtem->next, Pre), ll) ==>
+	    \let sll = to_logic_list{Pre}(\at(previtem->next, Pre), NULL) ;
+	      \length(sll) <= \length(ll) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    \let ll = to_logic_list{Pre}(newitem->next, NULL) ;
+	    in_list(\at(previtem->next, Pre), ll) ==>
+	    \let sll = to_logic_list{Pre}(\at(previtem->next, Pre), NULL) ;
+	    \forall integer i ; 0 <= i < \length(sll) ==>
+	      (\valid{Pre}(\at(\nth(sll, i), Pre)) && \valid{AR}(\at(\nth(sll, i), AR)) &&
+	      \at(\nth(sll, i)->next, Pre) == \at(\nth(sll, i)->next, AR)) ;	      
+	  */
+	}
+	/*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem->next, NULL)) ==>
+	  linked_ll{Pre}(\at(previtem->next, Pre), NULL,
+	              to_logic_list{Pre}(\at(previtem->next, Pre), NULL)) ;
+	*/
+	/* @ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem->next, NULL)) ==>
+	  \at(*list, Pre) == \at(*list, AR) ;
+	*/
+	/* @ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem->next, NULL)) ==>
+	  unchanged{Pre, AR}(to_logic_list{Pre}(\at(previtem->next, Pre), NULL)) ;
+	*/
+      }
+
+      /*@ assigns \nothing ;
+	ensures EASY_Right: in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(\at(*list, Pre), newitem)) ==>
+	to_logic_list{AR}(\at(previtem->next, AR), NULL) == 
+	(to_logic_list{Pre}(\at(previtem->next, Pre), newitem) ^ 
+	 to_logic_list{Pre}(\at(newitem->next, Pre), NULL)) ;
+      */ {
+	/*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(\at(*list, Pre), newitem)) ==>
+	  (to_logic_list{AR}(\at(*list, AR), \at(previtem->next, AR)) ^
+	   to_logic_list{AR}(\at(previtem->next, AR), NULL))
+	   ==
+	  (to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, AR)) ^ 
+	   to_logic_list{Pre}(\at(previtem->next, AR), newitem) ^
+	   to_logic_list{Pre}(\at(newitem->next, Pre), NULL)) ;
+	*/
+	/*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(\at(*list, Pre), newitem)) ==>
+	  to_logic_list{AR}(\at(*list, AR), \at(previtem->next, AR)) ==
+	  to_logic_list{Pre}(\at(*list, Pre), \at(previtem->next, AR)) ;
+	*/
+	//@ assert \at(previtem->next, AR) == \at(previtem->next, Pre) ;
+      }
+      
+      /*@ assigns \nothing ;
+	ensures EASY_Left: in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	to_logic_list{AR}(\at(*list, AR), \at(previtem->next, AR)) == 
+	(to_logic_list{Pre}(\at(*list, Pre), newitem) ^ 
+	 to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, Pre))) ;
+      */ {
+	/*@ assigns \nothing ;
+	  ensures in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	  (to_logic_list{AR}(\at(*list, AR), \at(previtem->next, AR)) ^
+	   to_logic_list{AR}(\at(previtem->next, AR), NULL))
+	   ==
+	  (to_logic_list{Pre}(\at(*list, Pre), newitem) ^
+	   to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, AR)) ^
+	   to_logic_list{Pre}(\at(previtem->next, AR), NULL)) ;
+	*/ {
+	  /*@ assert in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	    in_list(\at(previtem->next, AR), to_logic_list{AR}(\at(*list, AR), NULL)) || 
+	    \at(previtem->next, AR) == NULL ;
+	  */
+	  /*@ assert in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	    linked_ll(\at(*list, AR), NULL, to_logic_list{AR}(\at(*list, AR), NULL)) ;
+	  */
+	  /*@ assert in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	    to_logic_list{AR}(\at(*list, AR), NULL) ==
+	    (to_logic_list{AR}(\at(*list, AR), \at(previtem->next, AR)) ^
+	    to_logic_list{AR}(\at(previtem->next, AR), NULL)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    to_logic_list{AR}(\at(*list, AR), NULL) ==
+	    (to_logic_list{Pre}(\at(*list, Pre), newitem) ^
+	    to_logic_list{Pre}(\at(newitem->next, Pre), NULL)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    in_list(\at(previtem->next, Pre), to_logic_list{Pre}(\at(newitem->next, Pre), NULL)) ==>
+	    to_logic_list{Pre}(\at(newitem->next, Pre), NULL) ==
+	    (to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, Pre)) ^
+	    to_logic_list{Pre}(\at(previtem->next, Pre), NULL)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    \at(previtem->next, Pre) == NULL ==>
+	    to_logic_list{Pre}(\at(newitem->next, Pre), NULL) ==
+	    (to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, Pre)) ^
+	    to_logic_list{Pre}(\at(previtem->next, Pre), NULL)) ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	    in_list(\at(previtem->next, Pre), to_logic_list{Pre}(\at(newitem->next, Pre), NULL)) || 
+	    \at(previtem->next, Pre) == NULL ;
+	  */
+	  /*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	    in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	    to_logic_list{Pre}(\at(newitem->next, Pre), NULL) ==
+	    (to_logic_list{Pre}(\at(newitem->next, Pre), \at(previtem->next, Pre)) ^
+	    to_logic_list{Pre}(\at(previtem->next, Pre), NULL)) ;
+	  */
+	}
+	/*@ assert in_list(newitem, to_logic_list{Pre}(\at(*list, Pre), NULL)) ==>
+	  in_list(previtem, to_logic_list{Pre}(newitem, NULL)) ==>
+	  to_logic_list{AR}(\at(previtem->next, AR), NULL) == 
+	  to_logic_list{Pre}(\at(previtem->next, Pre), NULL) ;
+	*/
+      }
+
+      
+      list_force_insert(list, previtem, newitem);
+    }
   }
 }
 /*---------------------------------------------------------------------------*/
