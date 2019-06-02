@@ -126,12 +126,28 @@
        list_init((struct_ptr)->name);                                   \
     } while(0)
 
+#include "list_logic_defs.spec"
+#include "list_lemmas.spec"
+
 /**
  * The linked list type.
  *
  */
 typedef void ** list_t;
 
+/*@ requires \valid(list);
+  @ 
+  @ assigns *list ;
+  @ 
+  @ ensures ValidHandler:  \valid(list);
+  @ ensures HandlerSep:    dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ ensures Linked:         linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ ensures LengthMax:     \length(to_logic_list(*list, NULL)) < INT_MAX ;
+  @
+  @ ensures *list == NULL;
+  @ ensures to_logic_list(*list, NULL) == \Nil ;
+  @ ensures linked_ll(*list, NULL, \Nil);
+  @*/
 void   list_init(list_t list);
 void * list_head(list_t list);
 void * list_tail(list_t list);
