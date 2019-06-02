@@ -226,6 +226,44 @@ void * list_tail(list_t list);
   @ disjoint behaviors;
   @*/
 void * list_pop (list_t list);
+/*@ requires ValidHandler: \valid(list);
+  @ requires HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ requires Linked:        linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ requires LengthMax:    \length(to_logic_list(*list, NULL)) < INT_MAX ;
+  @ requires \valid(item) && \separated(list, item);
+  @ requires in_list(item, to_logic_list(*list, NULL)) ||
+  @          ptr_separated_from_list(item, to_logic_list(*list, NULL)) ;
+  @
+  @ ensures HandlerSep:    dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ ensures ValidHandler:  \valid(list);
+  @ ensures Linked:         linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ ensures First:         *list == item ;
+  @
+  @ assigns *list,
+  @         item->next,
+  @         { l->next 
+  @           | struct list* l ; 
+  @             in_list(l, to_logic_list{Pre}(\at(*list, Pre), NULL)) && 
+  @             \at(l->next, Pre) == item } ;
+  @
+  @ behavior does_not_contain:
+  @   assumes ! in_list(item, to_logic_list(*list, NULL)) ;
+  @   ensures AddedBegin: to_logic_list(*list, NULL) ==
+  @                     ([| item |] ^ to_logic_list{Pre}(\old(*list), NULL)) ;
+  @   ensures SizeInc: \length(to_logic_list(*list, NULL)) == 
+  @                    \length(to_logic_list{Pre}(\at(*list,Pre), NULL)) + 1 ;
+  @
+  @ behavior contains:
+  @   assumes in_list(item, to_logic_list(*list, NULL)) ;
+  @   ensures NewList: to_logic_list(*list, NULL) ==
+  @     ([| item |] ^ to_logic_list{Pre}(\old(*list), item) ^ 
+  @      to_logic_list{Pre}(\at(item->next,Pre), NULL)) ;
+  @   ensures SameSize: \length(to_logic_list(*list, NULL)) == 
+  @                     \length(to_logic_list{Pre}(\at(*list,Pre), NULL)) ;
+  @           
+  @ complete behaviors;
+  @ disjoint behaviors;
+*/
 void   list_push(list_t list, void *item);
 void * list_chop(list_t list);
 /*@ requires ValidHandler: \valid(list);

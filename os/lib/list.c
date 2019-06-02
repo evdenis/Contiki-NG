@@ -303,8 +303,29 @@ list_push(list_t list, void *item)
   /* Make sure not to add the same element twice */
   list_remove(list, item);
 
+  //@ ghost AR: ;
+  
+  /*@ assert SepReformulation: \let ll = to_logic_list(*list, NULL) ;
+      \forall integer i ; 0 <= i < \length(ll) ==> \separated(\nth(ll, i), item) ;
+  */
+
   ((struct list *)item)->next = *list;
+
+  //@ assert unchanged{AR, Here}(to_logic_list{AR}(\at(*list, AR), NULL));
+  //@ assert to_logic_list(item, NULL) == ([| item |] ^ to_logic_list(*list, NULL));
+  //@ ghost Inter: ;
+
+  //@ assert \separated(list, item);
+  //@ assert dptr_separated_from_list(list, to_logic_list(item, NULL));
+  /*@ assert SepReformulation: \let ll = to_logic_list(*list, NULL) ;
+      \forall integer i ; 0 <= i < \length(ll) ==> \separated(\nth(ll, i), list) ;
+  */
+
+  
   *list = item;
+  
+  //@ assert unchanged{Inter, Here}(to_logic_list{Inter}(\at(item, Inter), NULL));
+  //@ assert to_logic_list(*list, NULL) == ([| item |] ^ to_logic_list{AR}(\at(*list, AR), NULL));
 }
 /*---------------------------------------------------------------------------*/
 /**
