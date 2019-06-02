@@ -12,7 +12,6 @@ addons:
       - libgtksourceview2.0-dev
       - cvc3
       - z3
-      - coq
       - coccinelle
 
 cache:
