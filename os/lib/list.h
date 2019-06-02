@@ -149,6 +149,29 @@ typedef void ** list_t;
   @ ensures linked_ll(*list, NULL, \Nil);
   @*/
 void   list_init(list_t list);
+/*@ requires ValidHandler: \valid(list);
+  @ requires HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ requires Linked:        linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ requires LengthMax:    \length(to_logic_list(*list, NULL)) < INT_MAX ;
+  @ 
+  @ assigns \nothing ;
+  @
+  @ ensures ValidHandler:  \valid(list);
+  @ ensures HandlerSep:    dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ ensures Linked:         linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ ensures LengthMax:     \length(to_logic_list(*list, NULL)) < INT_MAX ;
+  @ 
+  @ behavior empty:
+  @   assumes *list == NULL;
+  @   ensures \result == NULL;
+  @   
+  @ behavior not_empty:
+  @   assumes *list != NULL;
+  @   ensures \result == \nth(to_logic_list(*list, NULL), 0);
+  @
+  @ complete behaviors;
+  @ disjoint behaviors;
+*/
 void * list_head(list_t list);
 /*@ requires ValidHandler: \valid(list);
   @ requires HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));
