@@ -100,7 +100,7 @@ struct memb {
   void *mem;
 };
 
-#include "logic_defs_memb.h"
+#include "memb_logic_defs.spec"
 
 /**
  * Initialize a memory block that was declared with MEMB().
