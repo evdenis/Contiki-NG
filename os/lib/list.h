@@ -306,6 +306,53 @@ void * list_chop(list_t list);
   @ disjoint behaviors;
 */
 void   list_add(list_t list, void *item);
+/*@ requires ValidHandler: \valid(list);
+  @ requires HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ requires Linked:        linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ requires LengthMax:    \length(to_logic_list(*list, NULL)) < INT_MAX ;
+  @ requires \valid(item) ;
+  @ requires in_list(item, to_logic_list(*list, NULL)) ||
+  @          ptr_separated_from_list(item, to_logic_list(*list, NULL)) ;
+  @
+  @ ensures ValidHandler:  \valid(list);
+  @ ensures HandlerSep:    dptr_separated_from_list(list, to_logic_list(*list, NULL));
+  @ ensures Linked:         linked_ll(*list, NULL, to_logic_list(*list, NULL));
+  @ ensures ItemUnchanged: item->next == \old(item->next) && \valid(item);
+  @ ensures ItemNotIn:     ptr_separated_from_list(item, to_logic_list(*list, NULL));
+  @ ensures AllOthers:    \forall struct list* l ; l != item ==> (
+  @                          in_list(l, to_logic_list{Pre}(\old(*list), NULL)) <==>
+  @                            in_list(l, to_logic_list(*list, NULL)));
+  @ 
+  @ assigns *list,
+  @         { l->next 
+  @           | struct list* l ; 
+  @             in_list(l, to_logic_list{Pre}(\at(*list, Pre), NULL)) && 
+  @             \at(l->next, Pre) == item } ;
+  @
+  @ behavior does_not_contain:
+  @   assumes ! in_list(item, to_logic_list(*list, NULL)) ;
+  @   ensures *list == \old(*list) ;
+  @   ensures SameList:  to_logic_list{Pre}(\old(*list), NULL) == to_logic_list(*list, NULL) ;
+  @   ensures SameSize: \length(to_logic_list(*list, NULL)) == 
+  @                     \length(to_logic_list{Pre}(\at(*list,Pre), NULL)) ;
+  @
+  @ behavior contains:
+  @   assumes in_list(item, to_logic_list(*list, NULL)) ;
+  @   ensures \old(*list) == item ==> *list == \old(item->next) ;
+  @   ensures \old(*list) != item ==> *list == \old(*list) ;
+  @   ensures Link: \forall struct list* e ; 
+  @     (in_list(e, to_logic_list{Pre}(\at(*list, Pre), NULL)) && \at(e->next, Pre) == item) ==> 
+  @       e->next == item->next ;
+  @       
+  @   ensures NewList:
+  @     (to_logic_list{Pre}(\old(*list), item) ^ to_logic_list{Pre}(item->next, NULL)) ==
+  @       to_logic_list(*list, NULL) ;
+  @   ensures SizeReduced: \length(to_logic_list(*list, NULL)) == 
+  @                        \length(to_logic_list{Pre}(\at(*list,Pre), NULL)) - 1 ;
+  @           
+  @ complete behaviors;
+  @ disjoint behaviors;
+  @*/
 void   list_remove(list_t list, void *item);
 /*@ requires ValidHandler: \valid(list);
   @ requires HandlerSep:   dptr_separated_from_list(list, to_logic_list(*list, NULL));
