@@ -46,7 +46,7 @@ install:
 script:
   - git remote set-branches --add origin $TRAVIS_BRACH
   - git fetch
-  - git diff --name-only --diff-filter=AM HEAD...$TRAVIS_BRANCH | grep '\.[ch]$' | sed -e 's/^/--module /' | tr '\n' ' ' | tee modified_files.txt
+  - git diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep '\.\(c\|h\|spec\)$' | sed -e 's/^/--module /' | tr '\n' ' ' | tee modified_files.txt
   - test -s modified_files.txt || echo --module $(pwd)/os/lib/ > modified_files.txt
   - eval $(opam config env); ../spec-utils/bin/extricate --type contiki --config $(pwd)/verif/contiki_extricate.conf --done $(pwd)/verif/contiki_status.conf --kernel $(pwd) $(cat modified_files.txt)
   - ../spec-utils/scripts/compare_verdicts $(pwd)/verif/verdicts.txt $(pwd)/verif/new_verdicts.txt
