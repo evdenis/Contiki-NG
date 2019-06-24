@@ -31,9 +31,9 @@ Engage with the community:
 
 # Verification
 
-[![Verification Status](https://travis-ci.org/evdenis/Contiki-NG.svg?branch=continuous-verification)](https://travis-ci.org/evdenis/Contiki-NG)
+[![Verification Status](https://travis-ci.org/evdenis/Contiki-NG.svg?branch=develop)](https://travis-ci.org/evdenis/Contiki-NG)
 
-We have added Travis CI to demonstrate what steps are required to set up continuous verification. Travis performs the replays of proofs with reduced timeouts to fit the 50 mins limit. That means the results in Travis are downgraded comparing to that we state that all functions with ACSL specs are fully verified. Coq proofs are not replayed because the Coq installation takes too long.
+Travis CI is added for demonstration of required steps to set up continuous verification. Travis-CI replays proofs with reduced timeouts to fit the 50 mins limit. Thus Travis-CI results are downgraded comparing to that we state that all functions with ACSL specs are fully verified. Coq proofs are not replayed because the Coq installation takes too long.
 
 * The [list of verified functions](verif/contiki_status.conf) to replay
 * The [verification status](verif/verdicts.txt) to compare against
