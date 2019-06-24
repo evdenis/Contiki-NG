@@ -1,84 +1,53 @@
-# Setup environment for Docker
-language: generic
-services: docker
-notifications:
-  email: false
+language: perl
+perl: "5.28"
+os:
+  - linux
+dist: xenial
+addons:
+  apt:
+    packages:
+      - aspcud
+      - libgnomecanvas2-dev
+      - libgtk2.0-dev
+      - libgtksourceview2.0-dev
+      - cvc3
+      - z3
+
+cache:
+  directories:
+    - $HOME/perl5
+    - $HOME/.opam
+    - /usr/local/bin
+
+env:
+  global:
+    - WP_TIMEOUT=15
+    - WP_PROCESSES=2
 
 # Environment setup before test script. Runs for each build
 before_install:
-  # Check if anything has changed within the docker directory
-  - DOCKER_CHANGED=`git diff --name-only $TRAVIS_COMMIT_RANGE -- tools/docker | wc -l`
-  # If Docker directory has not changed, pull image from Dockerhub. Else, build
-  # image from Dockerifle. This needs to be done for each job. Any build error
-  # will count as Travis test failure. In case this updates develop, push new
-  # image to Dockerhub (secure credentials only readable on bulids to
-  # contiki-ng/contiki-ng branches, not forks or PRs)
-  - >
-    if [ $DOCKER_CHANGED == 0 ]; then
-      echo "Docker image unchanged, pull from Dockerhub"
-      docker pull $DOCKER_IMG;
-    else
-      echo "Docker image changed, build from Dockerfile"
-      docker build tools/docker -t $DOCKER_IMG;
-      if [ $? != 0 ]; then
-        echo "Failed to build Docker image"
-        exit 1
-      fi
-      if [ $TRAVIS_SECURE_ENV_VARS == true ] && [ $TRAVIS_PULL_REQUEST == false ] && [ $TRAVIS_BRANCH == 'develop' ]; then
-        echo "This build is for an update of branch develop. Push image to Dockerhub"
-        echo $DOCKERHUB_PASSWD | docker login --username contiker --password-stdin
-        docker push $DOCKER_IMG;
-      fi
-    fi
-  # Build Cooja conditionally
-  - if [ ${BUILD_COOJA:-false} = true ] ; then
-      ant -q -f $CNG_HOST_PATH/tools/cooja/build.xml jar ;
-    fi
+  - sudo apt-get update -qq
+  - sudo wget --no-clobber http://cvc4.cs.stanford.edu/downloads/builds/x86_64-linux-opt/cvc4-1.6-x86_64-linux-opt -O /usr/local/bin/cvc4 || true
+  - sudo chmod +x /usr/local/bin/cvc4
+  - sudo wget --no-clobber https://github.com/ocaml/opam/releases/download/2.0.4/opam-2.0.4-x86_64-linux -O /usr/local/bin/opam || true
+  - sudo chmod +x /usr/local/bin/opam
+  - opam init --auto-setup --disable-sandboxing --compiler=4.06.1
+  - opam install --yes depext
 
-  # Create a directory for out of tree tests and clone the test repo therein
-  # The directory will need created unconditionally so we can always chgrp and
-  # mount it, even if empty. Checkout a pre-defined version.
-  - mkdir -p $OUT_OF_TREE_TEST_PATH
-  - if [ ${TEST_NAME} = "out-of-tree-build" ] ; then
-      git clone --depth 1 https://github.com/contiki-ng/out-of-tree-tests $OUT_OF_TREE_TEST_PATH &&
-      cd $OUT_OF_TREE_TEST_PATH &&
-      git checkout $OUT_OF_TREE_TEST_VER ;
-    fi
-  # Set permissions for Docker mount
-  - sudo chgrp -hR 1000 $CNG_HOST_PATH $OUT_OF_TREE_TEST_PATH
+install:
+  - opam update
+  - opam upgrade --yes
+  - opam depext --yes --noninteractive --install frama-c.18.0 why3.0.88.3 alt-ergo menhir
+  - opam pin add why3 0.88.3
+  - opam pin add frama-c 18.0
+  - eval $(opam config env); why3 config --detect
+  - cd ../; wget http://coccinelle.lip6.fr/distrib/coccinelle-1.0.7.tar.gz; tar xf coccinelle-1.0.7.tar.gz; cd coccinelle-1.0.7; autoconf && ./configure --prefix=/usr/local/ && make && sudo make install; cd ../Contiki-NG
+  - cd ../; git clone https://github.com/evdenis/spec-utils; cd spec-utils; cpanm --quiet --notest --installdeps .; cd ../Contiki-NG
 
-# The test script for each build
 script:
-  - docker run --privileged -v $OUT_OF_TREE_TEST_PATH:/home/user/out-of-tree-tests -v $CNG_HOST_PATH:/home/user/contiki-ng -ti $DOCKER_IMG bash --login -c "make -C tests/??-$TEST_NAME";
-  # Check outcome of the test
-  - $CNG_HOST_PATH/tests/check-test.sh $CNG_HOST_PATH/tests/??-$TEST_NAME; exit $?;
-
-# Environment variables
-env:
-  # Global environment variables, i.e., set for all builds
-  global:
-    - DOCKER_IMG='contiker/contiki-ng'
-    - CNG_HOST_PATH=`pwd`
-    - OUT_OF_TREE_TEST_PATH=$HOME/out-of-tree-tests
-    - OUT_OF_TREE_TEST_VER=2869ae7
-    # Encrypted environment variables.
-    # Only available on builds of contiki-ng/contiki-ng branches, not PRs or forks.
-    - secure: 0nrV5yjpT2kE19Hlm7t619Qbmyjx/G7bSUI1c+U3kZbyuxnRlASjVcDN5uPBoimIfGiBRI0nRq690BogAJt4EKwbC1Dy8kC1XD8mRtQ2AIZ6PHaUoG9iS5sBhFBQK0XkB83bwh6omRn/04O0uuX74ooSWT7fDrWxi/y5+0ysXK6gRtOhdrJ3FU5OkNVewX8NeCdx3pOWhMOtXWdFkMIi1XRdDnvMM5/hHlHMkdXXtaZQX9UsK3Q3DSjPRLZjKRiOlcx9MIg2ebh9ITmd2Du2p2q/LKtoutJckvhbKQPWcZi/B+1ZTSff0FHBIg+EYxf6TeFuia7XSTWH7sr2CDCCtcvSR9bB5yW6jdmGfa8Af8I1TCBuqoSUo0Re50BZBZF7COleEh+IojbjXn2CIDMg5rT4Sh3qcMGvFn9OW1cz5h5UNSOk7EIAXXPcI7Aloxh2sBo4/DrvvbfIsKrvxV9Fx4bdyNtR7dZ7xsoOw6L0zttC3K9naf3VAOeBAyjBiRwm0tWxJC/buhTsKlYrthhyUrwLtYAFL4UHcazvz57hY/cEzR2X6F//9Hp7HFoNtn1E36doX3ZfeI22yxHMo9SYW7O69C45wbhJ29lAA9XXbYVyGBKFkY8C1NCZ0Xckt9H8/Ow5Sz8HmW/NNBJCn0Fsx+jezdGc4ED5naugNbLAyNg=
-  # Each line in the 'matrix' triggers a separate Travis build
-  matrix:
-    - TEST_NAME='compile-base'
-    - TEST_NAME='compile-arm-ports-01'
-    - TEST_NAME='compile-arm-ports-02'
-    - TEST_NAME='rpl-lite' BUILD_COOJA=true
-    - TEST_NAME='rpl-classic' BUILD_COOJA=true
-    - TEST_NAME='tun-rpl-br' BUILD_COOJA=true
-    - TEST_NAME='coap-lwm2m'
-    - TEST_NAME='simulation-base' BUILD_COOJA=true
-    - TEST_NAME='ieee802154' BUILD_COOJA=true
-    - TEST_NAME='compile-nxp-ports'
-    - TEST_NAME='documentation'
-    - TEST_NAME='compile-tools'
-    - TEST_NAME='native-runs'
-    - TEST_NAME='ipv6' BUILD_COOJA=true
-    - TEST_NAME='ipv6-nbr' BUILD_COOJA=true
-    - TEST_NAME='out-of-tree-build'
+  - git remote set-branches --add origin $TRAVIS_BRACH
+  - git fetch
+  - git diff --name-only --diff-filter=AM $TRAVIS_COMMIT_RANGE | grep '\.\(c\|h\|spec\)$' | sed -e 's/^/--module /' | tr '\n' ' ' | tee modified_files.txt
+  - test -s modified_files.txt || echo --module $(pwd)/os/lib/ > modified_files.txt
+  - eval $(opam config env); ../spec-utils/bin/extricate --type contiki --config $(pwd)/verif/contiki_extricate.conf --done $(pwd)/verif/contiki_status.conf --kernel $(pwd) $(cat modified_files.txt)
+  - ../spec-utils/scripts/compare_verdicts $(pwd)/verif/verdicts.txt $(pwd)/verif/new_verdicts.txt

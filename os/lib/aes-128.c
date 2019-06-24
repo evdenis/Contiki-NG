@@ -68,6 +68,10 @@ static uint8_t round_keys[11][AES_128_KEY_LENGTH];
 
 /*---------------------------------------------------------------------------*/
 /* multiplies by 2 in GF(2) */
+/*@ 
+  ensures 0 <= \result <= 255;
+  assigns \nothing;
+*/
 static uint8_t
 galois_mul2(uint8_t value)
 {
@@ -75,6 +79,15 @@ galois_mul2(uint8_t value)
   return ((value << 1) ^ xor_val);
 }
 /*---------------------------------------------------------------------------*/
+/*@
+  requires \valid_read(key+ (0 .. (AES_128_KEY_LENGTH - 1))); 
+  assigns round_keys[0][0 .. (AES_128_KEY_LENGTH - 1)], round_keys[1][0 .. (AES_128_KEY_LENGTH - 1)],
+  round_keys[2][0 .. (AES_128_KEY_LENGTH - 1)], round_keys[3][0 .. (AES_128_KEY_LENGTH - 1)],
+  round_keys[4][0 .. (AES_128_KEY_LENGTH - 1)], round_keys[5][0 .. (AES_128_KEY_LENGTH - 1)],
+  round_keys[6][0 .. (AES_128_KEY_LENGTH - 1)], round_keys[7][0 .. (AES_128_KEY_LENGTH - 1)],
+  round_keys[8][0 .. (AES_128_KEY_LENGTH - 1)], round_keys[9][0 .. (AES_128_KEY_LENGTH - 1)],
+  round_keys[10][0 .. (AES_128_KEY_LENGTH - 1)];
+*/
 static void
 set_key(const uint8_t *key)
 {
@@ -84,18 +97,41 @@ set_key(const uint8_t *key)
   
   rcon = 0x01;
   memcpy(round_keys[0], key, AES_128_KEY_LENGTH);
+
+  /*@  
+    loop invariant 1 <= i <= 11;
+    loop assigns i, rcon, j, round_keys[1][0 .. (AES_128_KEY_LENGTH - 1)],
+    round_keys[2][0 .. (AES_128_KEY_LENGTH - 1)], round_keys[3][0 .. (AES_128_KEY_LENGTH - 1)],
+    round_keys[4][0 .. (AES_128_KEY_LENGTH - 1)], round_keys[5][0 .. (AES_128_KEY_LENGTH - 1)],
+    round_keys[6][0 .. (AES_128_KEY_LENGTH - 1)], round_keys[7][0 .. (AES_128_KEY_LENGTH - 1)],
+    round_keys[8][0 .. (AES_128_KEY_LENGTH - 1)], round_keys[9][0 .. (AES_128_KEY_LENGTH - 1)],
+    round_keys[10][0 .. (AES_128_KEY_LENGTH - 1)];
+    loop variant 11 - i;
+  */
   for(i = 1; i <= 10; i++) {
     round_keys[i][0] = sbox[round_keys[i - 1][13]] ^ round_keys[i - 1][0] ^ rcon;
     round_keys[i][1] = sbox[round_keys[i - 1][14]] ^ round_keys[i - 1][1];
     round_keys[i][2] = sbox[round_keys[i - 1][15]] ^ round_keys[i - 1][2];
     round_keys[i][3] = sbox[round_keys[i - 1][12]] ^ round_keys[i - 1][3];
+    /*@ 
+      loop invariant 4 <= j <= AES_128_BLOCK_SIZE;
+      loop assigns j, round_keys[i][4 .. (AES_128_KEY_LENGTH - 1)];
+      loop variant 16 - j;
+    */
     for(j = 4; j < AES_128_BLOCK_SIZE; j++) {
       round_keys[i][j] = round_keys[i - 1][j] ^ round_keys[i][j - 4];
     }
     rcon = galois_mul2(rcon);
   }
 }
+
 /*---------------------------------------------------------------------------*/
+/*@ 
+  requires \valid(state+ (0 .. (AES_128_BLOCK_SIZE - 1)));
+  requires \valid_read(sbox+ (0 .. 255));
+  ensures \valid(state+ (0 .. (AES_128_BLOCK_SIZE - 1)));
+  assigns state[0 .. (AES_128_BLOCK_SIZE - 1)];
+*/
 static void
 encrypt(uint8_t *state)
 {
@@ -103,12 +139,26 @@ encrypt(uint8_t *state)
   
   /* round 0 */
   /* AddRoundKey */
+  /*@
+    loop invariant 0 <= i <= AES_128_BLOCK_SIZE;
+    loop assigns i, state[0 .. (AES_128_BLOCK_SIZE - 1)];
+    loop variant AES_128_BLOCK_SIZE - i;
+  */
   for(i = 0; i < AES_128_BLOCK_SIZE; i++) {
     state[i] = state[i] ^ round_keys[0][i];
   }
-  
+  /*@
+    loop invariant 1 <= round <= 11;
+    loop assigns i, round, buf1, buf2, buf3, buf4, state[0 .. (AES_128_BLOCK_SIZE - 1)];
+    loop variant 11 - round;
+  */
   for(round = 1; round <= 10; round++) {
     /* ByteSub */
+    /*@
+      loop invariant 0 <= i <= 16; 
+      loop assigns i, state[0 .. (AES_128_BLOCK_SIZE - 1)];
+      loop variant AES_128_BLOCK_SIZE - i;
+    */   
     for(i = 0; i < AES_128_BLOCK_SIZE; i++) {
       state[i] = sbox[state[i]];
     }
@@ -136,6 +186,11 @@ encrypt(uint8_t *state)
     /* last round skips MixColumn */
     if(round < 10) {
       /* MixColumn */
+      /*@
+        loop invariant 0 <= i <= 4;
+        loop assigns i, buf4, buf3, buf2, buf1, state[0 .. (AES_128_BLOCK_SIZE - 1)];
+        loop variant 4 - i;
+      */ 
       for(i = 0; i < 4; i++) {
         buf4 = (i << 2);
         buf1 = state[buf4] ^ state[buf4 + 1] ^ state[buf4 + 2] ^ state[buf4 + 3];
@@ -158,7 +213,11 @@ encrypt(uint8_t *state)
         state[buf4 + 3] = state[buf4 + 3] ^ buf3 ^ buf1;
       }
     }
-    
+    /*@
+      loop invariant 0 <= i <= AES_128_BLOCK_SIZE;
+      loop assigns i, state[0 .. (AES_128_BLOCK_SIZE - 1)];
+      loop variant AES_128_BLOCK_SIZE - i;
+    */  
     /* AddRoundKey */
     for(i = 0; i < AES_128_BLOCK_SIZE; i++) {
       state[i] = state[i] ^ round_keys[round][i];

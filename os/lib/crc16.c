@@ -43,6 +43,7 @@
 
 /* CITT CRC16 polynomial ^16 + ^12 + ^5 + 1 */
 /*---------------------------------------------------------------------------*/
+//@ assigns \nothing;
 unsigned short
 crc16_add(unsigned char b, unsigned short acc)
 {
@@ -62,11 +63,24 @@ crc16_add(unsigned char b, unsigned short acc)
   return acc;
 }
 /*---------------------------------------------------------------------------*/
+/*@
+   requires 0 <= len;
+   requires \valid_read(data + (0 .. len - 1));
+   assigns \nothing;
+ */
 unsigned short
 crc16_data(const unsigned char *data, int len, unsigned short acc)
 {
   int i;
-  
+
+
+  /*@
+    loop assigns i, acc, data;
+    loop invariant 0 <= i;
+    loop invariant data == \at(data, Pre) + i;
+    loop variant len - i;
+   */
+
   for(i = 0; i < len; ++i) {
     acc = crc16_add(*data, acc);
     ++data;
