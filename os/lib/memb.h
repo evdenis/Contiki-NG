@@ -112,7 +112,7 @@ struct memb {
   requires valid_memb(m);
   ensures valid_memb(m);
   ensures _memb_empty(m);
-  assigns m->count[0 .. (m->num - 1)];
+  assigns m->used[0 .. (m->num - 1)];
   assigns *((char*) m->mem + (0 .. (m->size * m->num - 1)));
 */
 void  memb_init(struct memb *m);
@@ -125,21 +125,21 @@ void  memb_init(struct memb *m);
 /*@
   requires valid_memb(m);
   ensures valid_memb(m);
-  assigns m->count[0 .. (m->num - 1)];
+  assigns m->used[0 .. (m->num - 1)];
   behavior free_found:
-    assumes \exists integer i; 0 <= i < m->num && m->count[i] == 0;
+    assumes \exists integer i; 0 <= i < m->num && m->used[i] == 0;
     ensures \exists integer i;
       0 <= i < m->num &&
-      \old(m->count[i]) == 0 &&
-      m->count[i] == 1 &&
+      \old(m->used[i]) == 0 &&
+      m->used[i] == 1 &&
       \result == (char*) m->mem + (i * m->size) &&
-      \forall integer j; (0 <= j < i || i < j < m->num) ==> m->count[j] == \old(m->count[j]);
+      \forall integer j; (0 <= j < i || i < j < m->num) ==> m->used[j] == \old(m->used[j]);
     ensures \valid((char*) \result + (0 .. (m->size - 1)));
     ensures _memb_numfree(m) == \old(_memb_numfree(m)) - 1;
     ensures _memb_allocated(m, \result);
   behavior full:
     assumes _memb_full(m);
-    ensures \forall integer i; 0 <= i < m->num ==> m->count[i] == \old(m->count[i]);
+    ensures \forall integer i; 0 <= i < m->num ==> m->used[i] == \old(m->used[i]);
     ensures _memb_numfree(m) == \old(_memb_numfree(m));
     ensures \result == NULL;
   complete behaviors;
@@ -161,7 +161,7 @@ void *memb_alloc(struct memb *m);
 /*@
   requires valid_memb(m);
   ensures valid_memb(m);
-  assigns m->count[_memb_index(m, ptr)];
+  assigns m->used[_memb_index(m, ptr)];
   behavior alloc_found:
     assumes _memb_has(m, ptr) && _memb_allocated(m, ptr);
     ensures !_memb_allocated(m, ptr);
@@ -171,10 +171,10 @@ void *memb_alloc(struct memb *m);
     assumes _memb_has(m, ptr) && !_memb_allocated(m, ptr);
     ensures !_memb_allocated(m, ptr);
     ensures _memb_numfree(m) == \old(_memb_numfree(m));
-    ensures \result == 0;
+    ensures \result == -1;
   behavior elem_notfound:
     assumes !_memb_has(m, ptr);
-    ensures m->count[_memb_index(m, ptr)] == \old(m->count[_memb_index(m, ptr)]);
+    ensures m->used[_memb_index(m, ptr)] == \old(m->used[_memb_index(m, ptr)]);
     ensures _memb_numfree(m) == \old(_memb_numfree(m));
     ensures \result == -1;
   complete behaviors;

@@ -60,6 +60,7 @@ frama-c						\
 	-wp-driver external.driver		\
 	-wp-script wp0.script			\
 	-wp-prover alt-ergo			\
+	-wp-prover why3:alt-ergo		\
 	-wp-prover cvc4				\
 	-wp-prover coq				\
 	"$@"

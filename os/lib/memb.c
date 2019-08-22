@@ -62,28 +62,28 @@ memb_alloc(struct memb *m)
 
   /*@
     loop invariant 0 <= i <= m->num;
-    loop invariant \forall int j; 0 <= j < i ==> m->count[j] != 0;
+    loop invariant \forall int j; 0 <= j < i ==> m->used[j] != 0;
     loop assigns i;
     loop variant m->num - i;
   */
   for(i = 0; i < m->num; ++i) {
-    //@ ghost occ_a_split(0, m->count, 0, i, m->num);
-    //@ ghost occ_a_split(0, m->count, i, i+1, m->num);
+    //@ ghost occ_a_split(0, m->used, 0, i, m->num);
+    //@ ghost occ_a_split(0, m->used, i, i+1, m->num);
     if(m->used[i] == false) {
       /* If this block was unused, we set the used flag on
 	 and return a pointer to the memory block. */
-      //@ assert occ_a{Here}(0, m->count, i, i+1) == 1;
+      //@ assert occ_a{Here}(0, m->used, i, i+1) == 1;
       //@ ghost BeforeAlloc:
       m->used[i] = true;
 
-      //@ ghost same_elems_means_same_occ(BeforeAlloc, Here, 0, m->count, 0, i);
-      //@ ghost same_elems_means_same_occ(BeforeAlloc, Here, 0, m->count, i+1, m->num);
+      //@ ghost same_elems_means_same_occ(BeforeAlloc, Here, 0, m->used, 0, i);
+      //@ ghost same_elems_means_same_occ(BeforeAlloc, Here, 0, m->used, i+1, m->num);
 
-      //@ assert occ_a{Here}(0, m->count, i, i+1) == 0;
-      //@ assert occ_a{Here}(0, m->count, i, i+1) == occ_a{BeforeAlloc}(0, m->count, i, i+1) - 1;
+      //@ assert occ_a{Here}(0, m->used, i, i+1) == 0;
+      //@ assert occ_a{Here}(0, m->used, i, i+1) == occ_a{BeforeAlloc}(0, m->used, i, i+1) - 1;
 
-      //@ ghost occ_a_split(0, m->count, 0, i, m->num);
-      //@ ghost occ_a_split(0, m->count, i, i+1, m->num);
+      //@ ghost occ_a_split(0, m->used, 0, i, m->num);
+      //@ ghost occ_a_split(0, m->used, i, i+1, m->num);
 
       //@ assert 0 <= i * m->size <= (m->num - 1) * m->size;
       return (void *)((char *)m->mem + (i * m->size));
@@ -114,22 +114,21 @@ memb_free(struct memb *m, void *ptr)
     loop variant m->num - i;
   */
   for(i = 0; i < m->num; ++i) {
-    //@ ghost occ_a_split(0, m->count, 0, i, m->num);
-    //@ ghost occ_a_split(0, m->count, i, i+1, m->num);
+    //@ ghost occ_a_split(0, m->used, 0, i, m->num);
+    //@ ghost occ_a_split(0, m->used, i, i+1, m->num);
     if(ptr2 == (char *)ptr) {
+      //@ ghost Before:
       /* We've found the block to which "ptr" points, so we check the allocation
          status to detect the double-free error and free the block. */
-      //@ ghost Before:
-
       if (m->used[i] == false)
         return -1;
       m->used[i] = false;
 
-      //@ ghost same_elems_means_same_occ(Before, Here, 0, m->count, 0, i);
-      //@ ghost same_elems_means_same_occ(Before, Here, 0, m->count, i+1, m->num);
+      //@ ghost same_elems_means_same_occ(Before, Here, 0, m->used, 0, i);
+      //@ ghost same_elems_means_same_occ(Before, Here, 0, m->used, i+1, m->num);
 
-      //@ ghost occ_a_split(0, m->count, 0, i, m->num);
-      //@ ghost occ_a_split(0, m->count, i, i+1, m->num);
+      //@ ghost occ_a_split(0, m->used, 0, i, m->num);
+      //@ ghost occ_a_split(0, m->used, i, i+1, m->num);
 
       return 0;
     }
@@ -154,7 +153,7 @@ memb_numfree(struct memb *m)
   /*@
     loop invariant 0 <= i <= m->num;
     loop invariant num_free <= i;
-    loop invariant num_free == occ_a(0, m->count, 0, i);
+    loop invariant num_free == occ_a(0, m->used, 0, i);
     loop assigns i, num_free;
     loop variant m->num - i;
   */
