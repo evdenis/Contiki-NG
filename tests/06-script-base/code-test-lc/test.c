@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (c) 2019, Inria.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -27,27 +27,80 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
  * OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/*---------------------------------------------------------------------------*/
-#ifndef PROJECT_CONF_H_
-#define PROJECT_CONF_H_
-/*---------------------------------------------------------------------------*/
-/* Change to match your configuration */
-#define IEEE802154_CONF_PANID            0xABCD
-#define IEEE802154_CONF_DEFAULT_CHANNEL      25
-/*---------------------------------------------------------------------------*/
-/* Enable the ROM bootloader */
-#define CCXXWARE_CONF_ROM_BOOTLOADER_ENABLE   1
-/*---------------------------------------------------------------------------*/
-/* For very sleepy operation */
-#define RF_BLE_CONF_ENABLED                   0
-#define UIP_CONF_TCP                          0
-#define RPL_CONF_LEAF_ONLY                    1
 
-/*
- * We'll fail without RPL probing, so turn it on explicitly even though it's
- * on by default
- */
-#define RPL_CONF_WITH_PROBING                 1
-/*---------------------------------------------------------------------------*/
-#endif /* PROJECT_CONF_H_ */
-/*---------------------------------------------------------------------------*/
+#include <stdio.h>
+
+#if TEST_LC_SWITCH
+#include <sys/lc-switch.h>
+#endif /* TEST_LC_SWITCH */
+
+#if TEST_LC_ADDRLABELS
+#include <sys/lc-addrlabels.h>
+#endif /* TEST_LC_ADDRLABELS */
+
+#define MAX_NUM_CALLS 10
+lc_t lc;
+
+int
+return_lc_set_call_count(void)
+{
+  static int call_count = 0;
+
+  printf("- LC_RESUME()\n");
+  LC_RESUME(lc);
+
+  /*
+   * The following three lines should be called only for the first
+   * call of this function after LC_INIT().
+   */
+  printf("- LC_SET()\n");
+  call_count++;
+  LC_SET(lc);
+  /*
+   * We should resume this function here for the second call and
+   * further
+   */
+
+  printf("- LC_END()\n\n");
+  LC_END();
+
+  return call_count;
+}
+
+int
+main(void)
+{
+  int ret = 0;
+  LC_INIT(lc);
+
+  /* We're going to call return_lc_set_call_count() several times */
+  for(int i = 0; i < MAX_NUM_CALLS; i++) {
+    if(return_lc_set_call_count() != 1) {
+      /* return_lc_set_call_count() should always return 1 */
+      ret = -1;
+      break;
+    }
+  }
+
+  if(ret == 0) {
+    /* LC_INIT() clears lc */
+    LC_INIT(lc);
+
+    /*
+     * After calling LC_INIT(), return_lc_set_call_count() should
+     * return 2, which means LC_SET() should be called this time since
+     * lc is cleared.
+     */
+    if(return_lc_set_call_count() != 2) {
+      ret = -1;
+    }
+  }
+
+  if(ret == 0) {
+    printf("test passed\n");
+  } else {
+    printf("test failed\n");
+  }
+
+  return ret;
+}
