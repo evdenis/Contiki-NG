@@ -118,10 +118,7 @@ memb_free(struct memb *m, void *ptr)
     //@ ghost occ_a_split(0, m->used, i, i+1, m->num);
     if(ptr2 == (char *)ptr) {
       //@ ghost Before:
-      /* We've found the block to which "ptr" points, so we check the allocation
-         status to detect the double-free error and free the block. */
-      if (m->used[i] == false)
-        return -1;
+
       m->used[i] = false;
 
       //@ ghost same_elems_means_same_occ(Before, Here, 0, m->used, 0, i);
