@@ -2,6 +2,18 @@
 
 # Contiki-NG: The OS for Next Generation IoT Devices
 
+# Verification
+
+[![Verification Status](https://travis-ci.org/evdenis/Contiki-NG.svg?branch=develop)](https://travis-ci.org/evdenis/Contiki-NG)
+
+Travis CI is added for demonstration of required steps to set up continuous verification. Travis-CI replays proofs with reduced timeouts to fit the 50 mins limit. Thus Travis-CI results are downgraded comparing to that we state that all functions with ACSL specs are fully verified. Coq proofs are not replayed because the Coq installation takes too long.
+
+* The [list of verified functions](verif/contiki_status.conf) to replay
+* The [verification status](verif/verdicts.txt) to compare against
+* Coccinelle [patches](verif/patches)
+* Frama-C [configuration](verif/contiki_extricate.conf) for different functions
+* Travis-CI [configuration](.travis.yml)
+
 [![Build Status](https://travis-ci.org/contiki-ng/contiki-ng.svg?branch=master)](https://travis-ci.org/contiki-ng/contiki-ng/branches)
 [![license](https://img.shields.io/badge/license-3--clause%20bsd-brightgreen.svg)](https://github.com/contiki-ng/contiki-ng/blob/master/LICENSE.md)
 [![Latest release](https://img.shields.io/github/release/contiki-ng/contiki-ng.svg)](https://github.com/contiki-ng/contiki-ng/releases/latest)
@@ -28,15 +40,3 @@ Engage with the community:
 
 * Gitter: https://gitter.im/contiki-ng
 * Twitter: https://twitter.com/contiki_ng
-
-# Verification
-
-[![Verification Status](https://travis-ci.org/evdenis/Contiki-NG.svg?branch=develop)](https://travis-ci.org/evdenis/Contiki-NG)
-
-Travis CI is added for demonstration of required steps to set up continuous verification. Travis-CI replays proofs with reduced timeouts to fit the 50 mins limit. Thus Travis-CI results are downgraded comparing to that we state that all functions with ACSL specs are fully verified. Coq proofs are not replayed because the Coq installation takes too long.
-
-* The [list of verified functions](verif/contiki_status.conf) to replay
-* The [verification status](verif/verdicts.txt) to compare against
-* Coccinelle [patches](verif/patches)
-* Frama-C [configuration](verif/contiki_extricate.conf) for different functions
-* Travis-CI [configuration](.travis.yml)
