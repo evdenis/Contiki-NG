@@ -2,11 +2,17 @@
 
 # Contiki-NG: The OS for Next Generation IoT Devices
 
-# Verification
+# Continuous Verification Framework for Contiki-NG
 
 [![Verification Status](https://travis-ci.org/evdenis/Contiki-NG.svg?branch=develop)](https://travis-ci.org/evdenis/Contiki-NG)
 
-Travis CI is added for demonstration of required steps to set up continuous verification. Travis-CI replays proofs with reduced timeouts to fit the 50 mins limit. Thus Travis-CI results are downgraded comparing to that we state that all functions with ACSL specs are fully verified. Coq proofs are not replayed because the Coq installation takes too long.
+The continious verification framework is designed as part of the CI system and configured to (try to) reprove all previously verified functions in the set of files modified by a code update (generally
+submitted as a merge request). It relies on Travis-CI. It allows developers to constantly verify the evolving code and to detect potential inconsistencies early.
+
+A timeout per verification condition is currently set between 10 and 20 seconds (depending on the function) to provide a fast feedback and to fit the global 50-minute time
+limit of Travis-CI. This strict time limitation in the current demonstration version explains why the verification results for some provable properties can sometimes
+appear as partially unsuccessful for lack of time: in this case, the timeout for such properties can be increased.
+Coq proofs are currently not replayed because the Coq installation takes too long.
 
 * The [list of verified functions](verif/contiki_status.conf) to replay
 * The [verification status](verif/verdicts.txt) to compare against
@@ -19,6 +25,8 @@ Travis CI is added for demonstration of required steps to set up continuous veri
 [![Latest release](https://img.shields.io/github/release/contiki-ng/contiki-ng.svg)](https://github.com/contiki-ng/contiki-ng/releases/latest)
 [![GitHub Release Date](https://img.shields.io/github/release-date/contiki-ng/contiki-ng.svg)](https://github.com/contiki-ng/contiki-ng/releases/latest)
 [![Last commit](https://img.shields.io/github/last-commit/contiki-ng/contiki-ng.svg)](https://github.com/contiki-ng/contiki-ng/commit/HEAD)
+
+# Overview of Contiki-NG 
 
 Contiki-NG is an open-source, cross-platform operating system for Next-Generation IoT devices. It focuses on dependable (secure and reliable) low-power communication and standard protocols, such as IPv6/6LoWPAN, 6TiSCH, RPL, and CoAP. Contiki-NG comes with extensive documentation, tutorials, a roadmap, release cycle, and well-defined development flow for smooth integration of community contributions.
 
